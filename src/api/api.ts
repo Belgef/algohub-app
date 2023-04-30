@@ -144,29 +144,19 @@ export class UserClient {
 
     }
 
-    register(userName: string | null | undefined, fullName: string | null | undefined, email: string | null | undefined, password: string | null | undefined, iconName: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<FileResponse | null> {
+    register(user: UserCreateViewModel , cancelToken?: CancelToken | undefined): Promise<User> {
         let url_ = this.baseUrl + "/register";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = new FormData();
-        if (userName !== null && userName !== undefined)
-            content_.append("UserName", userName.toString());
-        if (fullName !== null && fullName !== undefined)
-            content_.append("FullName", fullName.toString());
-        if (email !== null && email !== undefined)
-            content_.append("Email", email.toString());
-        if (password !== null && password !== undefined)
-            content_.append("Password", password.toString());
-        if (iconName !== null && iconName !== undefined)
-            content_.append("IconName", iconName.toString());
+        const content_ = JSON.stringify(user);
 
         let options_: AxiosRequestConfig = {
             data: content_,
-            responseType: "blob",
             method: "POST",
             url: url_,
             headers: {
-                "Accept": "application/octet-stream"
+                "Content-Type": "application/json",
+                "Accept": "application/json"
             },
             cancelToken
         };
@@ -182,7 +172,7 @@ export class UserClient {
         });
     }
 
-    protected processRegister(response: AxiosResponse): Promise<FileResponse | null> {
+    protected processRegister(response: AxiosResponse): Promise<User> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -192,39 +182,30 @@ export class UserClient {
                 }
             }
         }
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
-            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
-            if (fileName) {
-                fileName = decodeURIComponent(fileName);
-            } else {
-                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            }
-            return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data], { type: response.headers["content-type"] }), headers: _headers });
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<User>(result200);
+
         } else if (status !== 200 && status !== 204) {
             const _responseText = response.data;
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
-        return Promise.resolve<FileResponse | null>(null as any);
+        return Promise.resolve<User>(null as any);
     }
 
-    login(userName: string | null | undefined, password: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<UserTokenData> {
+    login(user: UserLoginViewModel , cancelToken?: CancelToken | undefined): Promise<UserTokenData> {
         let url_ = this.baseUrl + "/login";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = new FormData();
-        if (userName !== null && userName !== undefined)
-            content_.append("UserName", userName.toString());
-        if (password !== null && password !== undefined)
-            content_.append("Password", password.toString());
+        const content_ = JSON.stringify(user);
 
         let options_: AxiosRequestConfig = {
             data: content_,
             method: "POST",
             url: url_,
             headers: {
+                "Content-Type": "application/json",
                 "Accept": "application/json"
             },
             cancelToken
@@ -253,9 +234,7 @@ export class UserClient {
         }
         if (status === 200) {
             const _responseText = response.data;
-            let result200: any = null;
-            let resultData200  = _responseText;
-            result200 = UserTokenData.fromJS(resultData200);
+            let result200: any = _responseText;
             return Promise.resolve<UserTokenData>(result200);
 
         } else if (status !== 200 && status !== 204) {
@@ -265,21 +244,18 @@ export class UserClient {
         return Promise.resolve<UserTokenData>(null as any);
     }
 
-    refreshToken(refreshToken: string | null | undefined, oldJwtToken: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<UserTokenData> {
+    refreshToken(tokens: UserRefreshTokenViewModel , cancelToken?: CancelToken | undefined): Promise<UserTokenData> {
         let url_ = this.baseUrl + "/refresh";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = new FormData();
-        if (refreshToken !== null && refreshToken !== undefined)
-            content_.append("RefreshToken", refreshToken.toString());
-        if (oldJwtToken !== null && oldJwtToken !== undefined)
-            content_.append("OldJwtToken", oldJwtToken.toString());
+        const content_ = JSON.stringify(tokens);
 
         let options_: AxiosRequestConfig = {
             data: content_,
             method: "POST",
             url: url_,
             headers: {
+                "Content-Type": "application/json",
                 "Accept": "application/json"
             },
             cancelToken
@@ -308,9 +284,7 @@ export class UserClient {
         }
         if (status === 200) {
             const _responseText = response.data;
-            let result200: any = null;
-            let resultData200  = _responseText;
-            result200 = UserTokenData.fromJS(resultData200);
+            let result200: any = _responseText;
             return Promise.resolve<UserTokenData>(result200);
 
         } else if (status !== 200 && status !== 204) {
@@ -321,44 +295,37 @@ export class UserClient {
     }
 }
 
-export class UserTokenData implements IUserTokenData {
-    token!: string;
-    refreshToken!: string;
-
-    constructor(data?: IUserTokenData) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.token = _data["token"];
-            this.refreshToken = _data["refreshToken"];
-        }
-    }
-
-    static fromJS(data: any): UserTokenData {
-        data = typeof data === 'object' ? data : {};
-        let result = new UserTokenData();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["token"] = this.token;
-        data["refreshToken"] = this.refreshToken;
-        return data;
-    }
+export interface User {
+    userId?: number | undefined;
+    userName?: string | undefined;
+    fullName?: string | undefined;
+    email?: string | undefined;
+    passwordHash?: string | undefined;
+    passwordSalt?: string | undefined;
+    iconName?: string | undefined;
 }
 
-export interface IUserTokenData {
+export interface UserCreateViewModel {
+    userName: string;
+    fullName?: string | undefined;
+    email: string;
+    password: string;
+    iconName?: string | undefined;
+}
+
+export interface UserTokenData {
     token: string;
     refreshToken: string;
+}
+
+export interface UserLoginViewModel {
+    userName: string;
+    password: string;
+}
+
+export interface UserRefreshTokenViewModel {
+    refreshToken: string;
+    oldJwtToken: string;
 }
 
 export interface FileResponse {
