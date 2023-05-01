@@ -144,7 +144,7 @@ export class UserClient {
 
     }
 
-    register(user: UserCreateViewModel , cancelToken?: CancelToken | undefined): Promise<User> {
+    register(user: UserCreateViewModel , cancelToken?: CancelToken | undefined): Promise<UserViewModel> {
         let url_ = this.baseUrl + "/register";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -172,7 +172,7 @@ export class UserClient {
         });
     }
 
-    protected processRegister(response: AxiosResponse): Promise<User> {
+    protected processRegister(response: AxiosResponse): Promise<UserViewModel> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -185,13 +185,13 @@ export class UserClient {
         if (status === 200) {
             const _responseText = response.data;
             let result200: any = _responseText;
-            return Promise.resolve<User>(result200);
+            return Promise.resolve<UserViewModel>(result200);
 
         } else if (status !== 200 && status !== 204) {
             const _responseText = response.data;
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
-        return Promise.resolve<User>(null as any);
+        return Promise.resolve<UserViewModel>(null as any);
     }
 
     login(user: UserLoginViewModel , cancelToken?: CancelToken | undefined): Promise<UserTokenData> {
@@ -293,15 +293,63 @@ export class UserClient {
         }
         return Promise.resolve<UserTokenData>(null as any);
     }
+
+    getUserById(userId: string | undefined , cancelToken?: CancelToken | undefined): Promise<UserViewModel> {
+        let url_ = this.baseUrl + "/User?";
+        if (userId === null)
+            throw new Error("The parameter 'userId' cannot be null.");
+        else if (userId !== undefined)
+            url_ += "userId=" + encodeURIComponent("" + userId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetUserById(_response);
+        });
+    }
+
+    protected processGetUserById(response: AxiosResponse): Promise<UserViewModel> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<UserViewModel>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<UserViewModel>(null as any);
+    }
 }
 
-export interface User {
-    userId?: number | undefined;
-    userName?: string | undefined;
+export interface UserViewModel {
+    userId: string;
+    userName: string;
     fullName?: string | undefined;
-    email?: string | undefined;
-    passwordHash?: string | undefined;
-    passwordSalt?: string | undefined;
+    email: string;
     iconName?: string | undefined;
 }
 

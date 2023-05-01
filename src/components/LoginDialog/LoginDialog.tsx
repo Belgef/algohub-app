@@ -1,29 +1,46 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
-import React, { useState } from 'react';
+import React from 'react';
+import { Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
 import { UserLoginViewModel } from '../../api/api';
-import { login } from '../../api/login';
+import { useSearchParams } from 'react-router-dom';
 
-const LoginModalButton = () => {
-    const [open, setOpen] = useState(false);
+export type LoginDialogProps = {
+    enabled: boolean;
+    onSubmit: (user: UserLoginViewModel) => boolean | Promise<boolean>;
+    onClose?: () => void;
+};
+
+const LoginDialog = (props: LoginDialogProps) => {
+    const [params, setParams] = useSearchParams();
+
     const { handleSubmit, control } = useForm<UserLoginViewModel>({
         defaultValues: { userName: '', password: '' },
     });
 
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
-    const handleLogin = async (user: UserLoginViewModel) => {
-        if (await login(user)) {
+    const handleOpen = () => {
+        params.set('login', 'true');
+        setParams(params);
+    };
+
+    const handleClose = () => {
+        params.delete('login');
+        setParams(params);
+        props.onClose?.();
+    };
+
+    const onSubmit = async (user: UserLoginViewModel) => {
+        if (await props.onSubmit(user)) {
             handleClose();
-            window.location.reload();
         }
     };
 
     return (
         <>
-            <Button onClick={handleOpen}>Login</Button>
-            <Dialog open={open} onClose={handleClose}>
-                <form onSubmit={handleSubmit(handleLogin, (err) => console.log(err))}>
+            <Button onClick={handleOpen} sx={{ my: 1, color: 'white', display: 'block' }}>
+                Login
+            </Button>
+            <Dialog open={params.has('login') && props.enabled} onClose={handleClose}>
+                <form onSubmit={handleSubmit(onSubmit, (err) => console.log(err))}>
                     <DialogTitle>Login</DialogTitle>
                     <DialogContent>
                         <Controller
@@ -77,4 +94,4 @@ const LoginModalButton = () => {
     );
 };
 
-export default LoginModalButton;
+export default LoginDialog;
