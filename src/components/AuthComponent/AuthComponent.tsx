@@ -1,4 +1,4 @@
-import { Box, Tooltip, IconButton, Avatar, Menu, MenuItem, Typography, styled } from '@mui/material';
+import { Box, Tooltip, IconButton, Avatar, Menu, MenuItem, Typography } from '@mui/material';
 import { getAccessToken } from 'axios-jwt';
 import jwtDecode from 'jwt-decode';
 import React from 'react';
@@ -6,6 +6,8 @@ import { useGetUserByIdQuery } from '../../api/slices/userApi';
 import { STORAGE_BASE_URL } from '../../api/constants';
 import useAuth from '../../hooks/useAuth';
 import LoginDialog from '../LoginDialog/LoginDialog';
+import RegisterDialog from '../RegisterDialog/RegisterDialog';
+import { userClient } from '../../api/clients';
 
 const AuthComponent = () => {
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
@@ -69,6 +71,10 @@ const AuthComponent = () => {
     ) : (
         <>
             <LoginDialog enabled={!loggedIn} onSubmit={async (user) => await handleLogin(user)} />
+            <RegisterDialog
+                enabled={!loggedIn}
+                onSubmit={async (user) => await userClient.register(user) }
+            />
         </>
     );
 };

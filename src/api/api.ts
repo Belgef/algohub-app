@@ -144,18 +144,27 @@ export class UserClient {
 
     }
 
-    register(user: UserCreateViewModel , cancelToken?: CancelToken | undefined): Promise<UserViewModel> {
+    register(user: UserCreateViewModel, cancelToken?: CancelToken | undefined): Promise<UserViewModel> {
         let url_ = this.baseUrl + "/register";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(user);
+        const content_ = new FormData();
+        if (user.userName !== null && user.userName !== undefined)
+            content_.append("UserName", user.userName.toString());
+        if (user.fullName !== null && user.fullName !== undefined)
+            content_.append("FullName", user.fullName.toString());
+        if (user.email !== null && user.email !== undefined)
+            content_.append("Email", user.email.toString());
+        if (user.password !== null && user.password !== undefined)
+            content_.append("Password", user.password.toString());
+        if (user.icon !== null && user.icon !== undefined)
+            content_.append("Icon", user.icon);
 
         let options_: AxiosRequestConfig = {
             data: content_,
             method: "POST",
             url: url_,
             headers: {
-                "Content-Type": "application/json",
                 "Accept": "application/json"
             },
             cancelToken
@@ -355,12 +364,12 @@ export interface UserViewModel {
 
 export interface UserCreateViewModel {
     userName: string;
-    fullName?: string | undefined;
+    fullName?: string;
     email: string;
+    icon?: File;
     password: string;
-    iconName?: string | undefined;
+    confirmPassword: string;
 }
-
 export interface UserTokenData {
     token: string;
     refreshToken: string;
