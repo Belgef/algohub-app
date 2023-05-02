@@ -14,6 +14,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { UserCreateViewModel, UserViewModel } from '../../api/api';
 import { useSearchParams } from 'react-router-dom';
 import StyledDropzone from '../Dropzone/Dropzone';
+import { userClient } from '../../api/clients';
 
 export type RegisterDialogProps = {
     enabled: boolean;
@@ -90,6 +91,16 @@ const RegisterDialog = (props: RegisterDialogProps) => {
                                     value: /^\w+$/,
                                     message: "Username must only contain letters, digits and symbol '_'",
                                 },
+                                validate: {
+                                    unique: async (value) => {
+                                        const result = await userClient.checkUserName(value);
+                                        if (result) {
+                                            return result;
+                                        } else {
+                                            return 'Username was already taken';
+                                        }
+                                    },
+                                },
                             }}
                         />
                         <Controller
@@ -137,6 +148,16 @@ const RegisterDialog = (props: RegisterDialogProps) => {
                             )}
                             rules={{
                                 required: { value: true, message: 'Email is required' },
+                                validate: {
+                                    unique: async (value) => {
+                                        const result = await userClient.checkEmail(value);
+                                        if (result) {
+                                            return result;
+                                        } else {
+                                            return 'Email was already taken';
+                                        }
+                                    },
+                                },
                             }}
                         />
                         <Controller
