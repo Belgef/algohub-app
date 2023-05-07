@@ -24,7 +24,7 @@ export class ProblemClient {
 
     }
 
-    getAll(  cancelToken?: CancelToken | undefined): Promise<ProblemViewModel> {
+    getAll(  cancelToken?: CancelToken | undefined): Promise<ProblemViewModel[]> {
         let url_ = this.baseUrl + "/Problem";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -48,7 +48,7 @@ export class ProblemClient {
         });
     }
 
-    protected processGetAll(response: AxiosResponse): Promise<ProblemViewModel> {
+    protected processGetAll(response: AxiosResponse): Promise<ProblemViewModel[]> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -61,13 +61,13 @@ export class ProblemClient {
         if (status === 200) {
             const _responseText = response.data;
             let result200: any = _responseText;
-            return Promise.resolve<ProblemViewModel>(result200);
+            return Promise.resolve<ProblemViewModel[]>(result200);
 
         } else if (status !== 200 && status !== 204) {
             const _responseText = response.data;
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
-        return Promise.resolve<ProblemViewModel>(null as any);
+        return Promise.resolve<ProblemViewModel[]>(null as any);
     }
 
     addProblem(problem: ProblemCreateViewModel, cancelToken?: CancelToken | undefined): Promise<number | null> {
