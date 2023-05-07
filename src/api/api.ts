@@ -24,16 +24,15 @@ export class ProblemClient {
 
     }
 
-    sampleAdmin(  cancelToken?: CancelToken | undefined): Promise<FileResponse | null> {
-        let url_ = this.baseUrl + "/Problem/SampleAdmin";
+    getAll(  cancelToken?: CancelToken | undefined): Promise<ProblemViewModel> {
+        let url_ = this.baseUrl + "/Problem";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: AxiosRequestConfig = {
-            responseType: "blob",
             method: "GET",
             url: url_,
             headers: {
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             },
             cancelToken
         };
@@ -45,11 +44,11 @@ export class ProblemClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processSampleAdmin(_response);
+            return this.processGetAll(_response);
         });
     }
 
-    protected processSampleAdmin(response: AxiosResponse): Promise<FileResponse | null> {
+    protected processGetAll(response: AxiosResponse): Promise<ProblemViewModel> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -59,34 +58,48 @@ export class ProblemClient {
                 }
             }
         }
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
-            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
-            if (fileName) {
-                fileName = decodeURIComponent(fileName);
-            } else {
-                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            }
-            return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data], { type: response.headers["content-type"] }), headers: _headers });
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<ProblemViewModel>(result200);
+
         } else if (status !== 200 && status !== 204) {
             const _responseText = response.data;
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
-        return Promise.resolve<FileResponse | null>(null as any);
+        return Promise.resolve<ProblemViewModel>(null as any);
     }
 
-    sampleUser(  cancelToken?: CancelToken | undefined): Promise<FileResponse | null> {
-        let url_ = this.baseUrl + "/Problem/SampleUser";
+    addProblem(problem: ProblemCreateViewModel, cancelToken?: CancelToken | undefined): Promise<number | null> {
+        let url_ = this.baseUrl + "/Problem";
         url_ = url_.replace(/[?&]$/, "");
 
+        const content_ = new FormData();
+        if (problem.problemName !== null && problem.problemName !== undefined)
+            content_.append("ProblemName", problem.problemName.toString());
+        if (problem.problemContentFile !== null && problem.problemContentFile !== undefined)
+            content_.append("ProblemContentFile", problem.problemContentFile);
+        if (problem.authorId === null || problem.authorId === undefined)
+            throw new Error("The parameter 'authorId' cannot be null.");
+        else
+            content_.append("AuthorId", problem.authorId.toString());
+        if (problem.image !== null && problem.image !== undefined)
+            content_.append("Image", problem.image);
+        if (problem.timeLimitMs === null || problem.timeLimitMs === undefined)
+            throw new Error("The parameter 'timeLimitMs' cannot be null.");
+        else
+            content_.append("TimeLimitMs", problem.timeLimitMs.toString());
+        if (problem.memoryLimitBytes === null || problem.memoryLimitBytes === undefined)
+            throw new Error("The parameter 'memoryLimitBytes' cannot be null.");
+        else
+            content_.append("MemoryLimitBytes", problem.memoryLimitBytes.toString());
+
         let options_: AxiosRequestConfig = {
-            responseType: "blob",
-            method: "GET",
+            data: content_,
+            method: "POST",
             url: url_,
             headers: {
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             },
             cancelToken
         };
@@ -98,11 +111,11 @@ export class ProblemClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processSampleUser(_response);
+            return this.processAddProblem(_response);
         });
     }
 
-    protected processSampleUser(response: AxiosResponse): Promise<FileResponse | null> {
+    protected processAddProblem(response: AxiosResponse): Promise<number | null> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -112,22 +125,65 @@ export class ProblemClient {
                 }
             }
         }
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
-            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
-            if (fileName) {
-                fileName = decodeURIComponent(fileName);
-            } else {
-                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            }
-            return Promise.resolve({ fileName: fileName, status: status, data: new Blob([response.data], { type: response.headers["content-type"] }), headers: _headers });
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<number | null>(result200);
+
         } else if (status !== 200 && status !== 204) {
             const _responseText = response.data;
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
-        return Promise.resolve<FileResponse | null>(null as any);
+        return Promise.resolve<number | null>(null as any);
+    }
+
+    get(problemId: number , cancelToken?: CancelToken | undefined): Promise<ProblemViewModel> {
+        let url_ = this.baseUrl + "/Problem/{problemId}";
+        if (problemId === undefined || problemId === null)
+            throw new Error("The parameter 'problemId' must be defined.");
+        url_ = url_.replace("{problemId}", encodeURIComponent("" + problemId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGet(_response);
+        });
+    }
+
+    protected processGet(response: AxiosResponse): Promise<ProblemViewModel> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<ProblemViewModel>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ProblemViewModel>(null as any);
     }
 }
 
@@ -144,7 +200,7 @@ export class UserClient {
 
     }
 
-    register(user: UserCreateViewModel, cancelToken?: CancelToken | undefined): Promise<UserViewModel> {
+    register(user: UserCreateViewModel, cancelToken?: CancelToken | undefined): Promise<string> {
         let url_ = this.baseUrl + "/register";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -181,7 +237,7 @@ export class UserClient {
         });
     }
 
-    protected processRegister(response: AxiosResponse): Promise<UserViewModel> {
+    protected processRegister(response: AxiosResponse): Promise<string> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -194,13 +250,13 @@ export class UserClient {
         if (status === 200) {
             const _responseText = response.data;
             let result200: any = _responseText;
-            return Promise.resolve<UserViewModel>(result200);
+            return Promise.resolve<string>(result200);
 
         } else if (status !== 200 && status !== 204) {
             const _responseText = response.data;
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
-        return Promise.resolve<UserViewModel>(null as any);
+        return Promise.resolve<string>(null as any);
     }
 
     login(user: UserLoginViewModel , cancelToken?: CancelToken | undefined): Promise<UserTokenData> {
@@ -450,6 +506,21 @@ export class UserClient {
     }
 }
 
+export interface ProblemViewModel {
+    problemId: number;
+    problemName: string;
+    problemContentFileName: string;
+    author?: UserViewModel | undefined;
+    imageName?: string | undefined;
+    views: number;
+    solves: number;
+    upvotes: number;
+    downvotes: number;
+    timeLimitMs: number;
+    memoryLimitBytes: number;
+    createDate: Date;
+}
+
 export interface UserViewModel {
     userId: string;
     userName: string;
@@ -482,11 +553,13 @@ export interface UserRefreshTokenViewModel {
     oldJwtToken: string;
 }
 
-export interface FileResponse {
-    data: Blob;
-    status: number;
-    fileName?: string;
-    headers?: { [name: string]: any };
+export interface ProblemCreateViewModel {
+    problemName: string | null | undefined, 
+    problemContentFile: File | null | undefined, 
+    authorId: string | undefined, 
+    image: File | null | undefined, 
+    timeLimitMs: number | undefined, 
+    memoryLimitBytes: number | undefined
 }
 
 export class ApiException extends Error {

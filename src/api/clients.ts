@@ -5,10 +5,12 @@ import {
     applyAuthTokenInterceptor,
     getAccessToken,
 } from 'axios-jwt';
-import { UserClient } from './api';
+import { ProblemClient, UserClient } from './api';
 
 export const axiosInstance = axios.create();
+
 export const userClient = new UserClient(undefined, axiosInstance);
+export const problemClient = new ProblemClient(undefined, axiosInstance);
 
 const requestRefresh: TokenRefreshRequest = async (refreshToken: string): Promise<IAuthTokens | string> => {
     const response = await new UserClient().refreshToken({ oldJwtToken: getAccessToken() ?? '', refreshToken });

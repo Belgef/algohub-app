@@ -11,14 +11,14 @@ import {
     Typography,
 } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
-import { UserCreateViewModel, UserViewModel } from '../../api/api';
+import { UserCreateViewModel } from '../../api/api';
 import { useSearchParams } from 'react-router-dom';
 import StyledDropzone from '../Dropzone/Dropzone';
 import { userClient } from '../../api/clients';
 
 export type RegisterDialogProps = {
     enabled: boolean;
-    onSubmit: (user: UserCreateViewModel) => UserViewModel | Promise<UserViewModel>;
+    onSubmit: (user: UserCreateViewModel) => string | Promise<string>;
     onClose?: () => void;
 };
 

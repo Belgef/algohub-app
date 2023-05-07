@@ -10,6 +10,7 @@ import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import AuthComponent from '../AuthComponent/AuthComponent';
+import { NavLink } from 'react-router-dom';
 
 const pages = ['Problems', 'Lessons'];
 
@@ -77,7 +78,9 @@ const Navbar = () => {
                         >
                             {pages.map((page) => (
                                 <MenuItem key={page} onClick={handleCloseNavMenu}>
-                                    <Typography textAlign='center'>{page}</Typography>
+                                    <Typography textAlign='center' component={NavLink} to={page}>
+                                        {page}
+                                    </Typography>
                                 </MenuItem>
                             ))}
                         </Menu>
@@ -105,6 +108,8 @@ const Navbar = () => {
                                 key={page}
                                 onClick={handleCloseNavMenu}
                                 sx={{ my: 1, color: 'white', display: 'block' }}
+                                component={NavLink}
+                                to={page}
                             >
                                 {page}
                             </Button>
