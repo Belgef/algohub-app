@@ -12,6 +12,7 @@ export const userApi = createApi({
             providesTags: ['User'],
         }),
     }),
+
 });
 
 export const { useGetUserByIdQuery } = userApi;

@@ -66,7 +66,6 @@ const LoginDialog = (props: LoginDialogProps) => {
                             name='password'
                             render={({ field, fieldState }) => (
                                 <TextField
-                                    autoFocus
                                     margin='dense'
                                     label='Password'
                                     type='password'

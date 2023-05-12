@@ -108,7 +108,6 @@ const RegisterDialog = (props: RegisterDialogProps) => {
                             name='fullName'
                             render={({ field, fieldState }) => (
                                 <TextField
-                                    autoFocus
                                     margin='dense'
                                     label='Full Name'
                                     type='text'
@@ -134,7 +133,6 @@ const RegisterDialog = (props: RegisterDialogProps) => {
                             name='email'
                             render={({ field, fieldState }) => (
                                 <TextField
-                                    autoFocus
                                     margin='dense'
                                     label='Email'
                                     type='email'
@@ -183,7 +181,6 @@ const RegisterDialog = (props: RegisterDialogProps) => {
                             name='password'
                             render={({ field, fieldState }) => (
                                 <TextField
-                                    autoFocus
                                     margin='dense'
                                     label='Password'
                                     type='password'
@@ -218,7 +215,6 @@ const RegisterDialog = (props: RegisterDialogProps) => {
                             name='confirmPassword'
                             render={({ field, fieldState }) => (
                                 <TextField
-                                    autoFocus
                                     margin='dense'
                                     label='Confirm password'
                                     type='password'

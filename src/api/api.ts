@@ -24,7 +24,7 @@ export class ProblemClient {
 
     }
 
-    getAll(  cancelToken?: CancelToken | undefined): Promise<ProblemViewModel[]> {
+    getAll(cancelToken?: CancelToken | undefined): Promise<ProblemViewModel[]> {
         let url_ = this.baseUrl + "/Problem";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -77,12 +77,8 @@ export class ProblemClient {
         const content_ = new FormData();
         if (problem.problemName !== null && problem.problemName !== undefined)
             content_.append("ProblemName", problem.problemName.toString());
-        if (problem.problemContentFile !== null && problem.problemContentFile !== undefined)
-            content_.append("ProblemContentFile", problem.problemContentFile);
-        if (problem.authorId === null || problem.authorId === undefined)
-            throw new Error("The parameter 'authorId' cannot be null.");
-        else
-            content_.append("AuthorId", problem.authorId.toString());
+        if (problem.problemContent !== null && problem.problemContent !== undefined)
+            problem.problemContent.forEach(item_ => content_.append("ProblemContent", item_.toString()));
         if (problem.image !== null && problem.image !== undefined)
             content_.append("Image", problem.image);
         if (problem.timeLimitMs === null || problem.timeLimitMs === undefined)
@@ -509,7 +505,7 @@ export class UserClient {
 export interface ProblemViewModel {
     problemId: number;
     problemName: string;
-    problemContentFileName: string;
+    problemContent: string;
     author?: UserViewModel | undefined;
     imageName?: string | undefined;
     views: number;
@@ -526,7 +522,24 @@ export interface UserViewModel {
     userName: string;
     fullName?: string | undefined;
     email: string;
+    role?: string | undefined;
     iconName?: string | undefined;
+}
+
+export interface ContentElement {
+    contentType: ContentType;
+    value?: string | undefined;
+    image?: any | undefined;
+    code: string;
+}
+
+export enum ContentType {
+    Subtitle = 0,
+    Emphasis = 1,
+    Paragraph = 2,
+    Image = 3,
+    Bar = 4,
+    Code = 5,
 }
 
 export interface UserCreateViewModel {
@@ -555,7 +568,7 @@ export interface UserRefreshTokenViewModel {
 
 export interface ProblemCreateViewModel {
     problemName: string | null | undefined, 
-    problemContentFile: File | null | undefined, 
+    problemContent: ContentElement[] | null | undefined, 
     authorId: string | undefined, 
     image: File | null | undefined, 
     timeLimitMs: number | undefined, 

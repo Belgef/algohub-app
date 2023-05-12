@@ -1,13 +1,11 @@
 import { Box, Tooltip, IconButton, Avatar, Menu, MenuItem, Typography } from '@mui/material';
-import { getAccessToken } from 'axios-jwt';
-import jwtDecode from 'jwt-decode';
 import React from 'react';
-import { useGetUserByIdQuery } from '../../api/slices/userApi';
 import { STORAGE_BASE_URL } from '../../api/constants';
 import useAuth from '../../hooks/useAuth';
 import LoginDialog from '../LoginDialog/LoginDialog';
 import RegisterDialog from '../RegisterDialog/RegisterDialog';
 import { userClient } from '../../api/clients';
+import useAuthorization from '../../hooks/useAuthorization';
 
 const AuthComponent = () => {
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
@@ -20,10 +18,8 @@ const AuthComponent = () => {
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
     };
-
-    const token = getAccessToken();
-    const data = (token ? jwtDecode(token) : {}) as { Id: string; Role: string };
-    const { data: user } = useGetUserByIdQuery(data?.Id);
+    
+    const user = useAuthorization();
 
     const name = user?.fullName ?? user?.userName;
 
