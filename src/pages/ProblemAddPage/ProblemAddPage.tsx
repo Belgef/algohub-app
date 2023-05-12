@@ -1,6 +1,5 @@
 import {
     Alert,
-    Box,
     Button,
     Card,
     CardActions,
@@ -12,35 +11,21 @@ import {
     Toolbar,
     Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React from 'react';
 import useAuthorization from '../../hooks/useAuthorization';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import StyledDropzone from '../../components/Dropzone/Dropzone';
 import RemoveIcon from '@mui/icons-material/DeleteOutline';
 import MoveUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import MoveDownIcon from '@mui/icons-material/KeyboardArrowDown';
-
-interface ProblemCreateRaw {
-    problemName: string | null | undefined;
-    problemContent: ContentElement[] | null | undefined;
-    authorId: string | undefined;
-    image: File | null | undefined;
-    timeLimitMs: number | undefined;
-    memoryLimitBytes: number | undefined;
-}
-
-type ContentType = 'subtitle' | 'emphasis' | 'paragraph' | 'image' | 'bar' | 'code';
-const contentTypes: ContentType[] = ['subtitle', 'emphasis', 'paragraph', 'image', 'bar', 'code'];
-
-interface ContentElement {
-    type: ContentType;
-    value?: string;
-    image?: File;
-    code?: string;
-}
+import { ContentType, ProblemCreateViewModel } from '../../api/api';
+import { useAddProblemMutation } from '../../api/slices/problemApi';
+import { useNavigate } from 'react-router-dom';
 
 const ProblemAddPage = () => {
-    const { control, handleSubmit } = useForm<ProblemCreateRaw>();
+    useAuthorization('User');
+
+    const { control, handleSubmit } = useForm<ProblemCreateViewModel>();
     const { fields, append, remove, swap } = useFieldArray({
         control,
         name: 'problemContent',
@@ -56,12 +41,17 @@ const ProblemAddPage = () => {
         },
     });
 
-    const user = useAuthorization('User');
-    const [imageUrl, setImageUrl] = useState('');
-    const [imageUrls, setImageUrls] = useState<{ [index: number]: string | undefined }>({});
+    const navigate = useNavigate();
 
-    const onSubmit = async (problem: ProblemCreateRaw) => {
+    const [addProblem] = useAddProblemMutation();
+
+    const onSubmit = async (problem: ProblemCreateViewModel) => {
         console.log(problem);
+        const result = await addProblem(problem);
+
+        if ('data' in result) {
+            navigate('/Problems/' + result.data);
+        }
     };
 
     return (
@@ -70,7 +60,6 @@ const ProblemAddPage = () => {
                 <Typography gutterBottom mt='1em' variant='h4' component='h4'>
                     Create new problem
                 </Typography>
-                {imageUrl && <Box component='img' alt='Title image' maxHeight='10em' src={imageUrl} />}
                 <Controller
                     control={control}
                     name='problemName'
@@ -104,12 +93,6 @@ const ProblemAddPage = () => {
                         <StyledDropzone
                             onChange={(files, e) => {
                                 field.onChange(e);
-                                URL.revokeObjectURL(imageUrl);
-                                if (files[0]) {
-                                    setImageUrl(URL.createObjectURL(files[0]));
-                                } else {
-                                    setImageUrl('');
-                                }
                             }}
                             error={fieldState.invalid}
                         />
@@ -170,18 +153,13 @@ const ProblemAddPage = () => {
                     </CardContent>
                     <CardContent>
                         {fields.map((field, index) => (
-                            <>
+                            <div key={field.id}>
                                 <Typography variant='h6'>
                                     <Toolbar disableGutters>
-                                        {field.type[0].toUpperCase() + field.type.slice(1)}
+                                        {ContentType[field.contentType]}
                                         <IconButton
                                             onClick={() => {
                                                 swap(index, index - 1);
-                                                setImageUrls({
-                                                    ...imageUrls,
-                                                    [index - 1]: imageUrls[index],
-                                                    [index]: imageUrls[index - 1],
-                                                });
                                             }}
                                             size='small'
                                             disabled={index === 0}
@@ -191,11 +169,6 @@ const ProblemAddPage = () => {
                                         <IconButton
                                             onClick={() => {
                                                 swap(index, index + 1);
-                                                setImageUrls({
-                                                    ...imageUrls,
-                                                    [index]: imageUrls[index + 1],
-                                                    [index + 1]: imageUrls[index],
-                                                });
                                             }}
                                             size='small'
                                             disabled={index === fields.length - 1}
@@ -205,11 +178,6 @@ const ProblemAddPage = () => {
                                         <IconButton
                                             onClick={() => {
                                                 remove(index);
-                                                URL.revokeObjectURL(imageUrls[index] ?? '');
-                                                setImageUrls({
-                                                    ...imageUrls,
-                                                    [index]: undefined,
-                                                });
                                             }}
                                             size='small'
                                         >
@@ -217,54 +185,31 @@ const ProblemAddPage = () => {
                                         </IconButton>
                                     </Toolbar>
                                 </Typography>
-                                {field.type === 'image' && (
-                                    <>
-                                        {imageUrls[index] && (
-                                            <Box
-                                                component='img'
-                                                alt='Title image'
-                                                maxHeight='10em'
-                                                src={imageUrls[index]}
+                                {field.contentType === ContentType.Image && (
+                                    <Controller
+                                        control={control}
+                                        name={`problemContent.${index}.image`}
+                                        render={(fldProps) => (
+                                            <StyledDropzone
+                                                onChange={(files, e) => {
+                                                    fldProps.field.onChange(e);
+                                                }}
+                                                error={fldProps.fieldState.invalid}
                                             />
                                         )}
-                                        <Controller
-                                            control={control}
-                                            name={`problemContent.${index}.image`}
-                                            render={(fldProps) => (
-                                                <StyledDropzone
-                                                    onChange={(files, e) => {
-                                                        fldProps.field.onChange(e);
-                                                        URL.revokeObjectURL(imageUrls[index] ?? '');
-                                                        if (files[0]) {
-                                                            setImageUrls({
-                                                                ...imageUrls,
-                                                                [index]: URL.createObjectURL(files[0]),
-                                                            });
-                                                        } else {
-                                                            setImageUrls({
-                                                                ...imageUrls,
-                                                                [index]: undefined,
-                                                            });
-                                                        }
-                                                    }}
-                                                    error={fldProps.fieldState.invalid}
-                                                />
-                                            )}
-                                            rules={{
-                                                required: { value: true, message: 'Image is required here' },
-                                            }}
-                                        />
-                                    </>
+                                        rules={{
+                                            required: { value: true, message: 'Image is required here' },
+                                        }}
+                                    />
                                 )}
-                                {field.type !== 'bar' && field.type !== 'code' && (
+                                {field.contentType !== ContentType.Bar && field.contentType !== ContentType.Code && (
                                     <Controller
-                                        key={field.id}
                                         control={control}
                                         name={`problemContent.${index}.value`}
                                         render={(fldProps) => (
                                             <TextField
                                                 margin='dense'
-                                                label={`Enter ${field.type}`}
+                                                label={`Enter ${ContentType[field.contentType]}`}
                                                 type='text'
                                                 multiline
                                                 fullWidth
@@ -279,8 +224,8 @@ const ProblemAddPage = () => {
                                         }}
                                     />
                                 )}
-                                {field.type === 'bar' && <Divider />}
-                            </>
+                                {field.contentType === ContentType.Bar && <Divider />}
+                            </div>
                         ))}
                         <Controller
                             control={control}
@@ -295,15 +240,21 @@ const ProblemAddPage = () => {
                         />
                     </CardContent>
                     <CardActions>
-                        {contentTypes.map((c, i) => (
-                            <Button key={i} onClick={() => append({ type: c })} sx={{ my: 1, display: 'block' }}>
-                                New {c}
+                        {(
+                            Object.keys(ContentType).filter((key) => key.length > 2) as Array<keyof typeof ContentType>
+                        ).map((key) => (
+                            <Button
+                                key={key}
+                                onClick={() => append({ contentType: ContentType[key] })}
+                                sx={{ my: 1, display: 'block' }}
+                            >
+                                New {key}
                             </Button>
                         ))}
                     </CardActions>
                 </Card>
                 <Button fullWidth variant='contained' type='submit'>
-                    Add lesson
+                    Add problem
                 </Button>
             </form>
         </Container>

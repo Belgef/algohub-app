@@ -529,8 +529,8 @@ export interface UserViewModel {
 export interface ContentElement {
     contentType: ContentType;
     value?: string | undefined;
-    image?: any | undefined;
-    code: string;
+    image?: File | undefined;
+    code?: string | undefined;
 }
 
 export enum ContentType {

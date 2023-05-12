@@ -1,5 +1,7 @@
+import { IconButton } from '@mui/material';
 import React, { useMemo, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import CloseIcon from '@mui/icons-material/Close';
 
 const baseStyle = {
     flex: 1,
@@ -43,40 +45,77 @@ const labelStyle = {
 };
 
 type DropzoneProps = {
-    onChange: (files:File[], ...error: any[]) => void;
+    onChange: (files: File[], ...error: any[]) => void;
     error?: boolean;
 };
 
-type DropResult = 'idle' | 'accepted' | 'rejected';
+type DropResult = 'idle' | 'rejected';
 
 const StyledDropzone = (props: DropzoneProps) => {
-    const [lastResult, setLastResult] = useState<[DropResult, string]>(['idle', "Drag 'n' drop an image here"]);
-    const { getRootProps, getInputProps, isFocused, isDragAccept, isDragReject } = useDropzone({
+    const [imageUrl, setImageUrl] = useState('');
+    const [lastResult, setLastResult] = useState<DropResult>('idle');
+    const { getRootProps, getInputProps, isFocused, isDragAccept, isDragReject, inputRef } = useDropzone({
         accept: { 'image/*': [] },
         multiple: false,
         onDropAccepted: (files, event) => {
-            props.onChange(files, {target:{value:files[0]}});
-            setLastResult(['accepted', 'Image accepted']);
+            props.onChange(files, { target: { value: files[0] } });
+            URL.revokeObjectURL(imageUrl);
+            if (files[0]) {
+                setImageUrl(URL.createObjectURL(files[0]));
+            } else {
+                setImageUrl('');
+            }
         },
-        onDropRejected: () => setLastResult(['rejected', 'Image rejected']),
+        onDropRejected: () => setLastResult('rejected'), //, 'Image rejected']),
     });
-    
+
     const style = useMemo(
         () => ({
             ...baseStyle,
             ...(isFocused ? focusedStyle : {}),
-            ...(isDragAccept || lastResult[0] === 'accepted' ? acceptStyle : {}),
-            ...((!isDragAccept && lastResult[0] === 'rejected') || isDragReject || props.error ? rejectStyle : {}),
+            ...(isDragAccept || imageUrl ? acceptStyle : {}),
+            ...((!isDragAccept && lastResult === 'rejected') || isDragReject || props.error ? rejectStyle : {}),
+            backgroundImage: `url("${imageUrl}")`,
+            backgroundSize: 'contain' as const,
+            backgroundRepeat: 'no-repeat' as const,
+            backgroundPosition: 'center' as const,
+            height: imageUrl ? 300 : 100,
+            transition: 'all 0.5s ease-in-out',
         }),
-        [isFocused, isDragAccept, isDragReject, props.error, lastResult]
+        [isFocused, isDragAccept, isDragReject, props.error, lastResult, imageUrl]
     );
 
     return (
-        <div className='container'>
+        <div className='container' style={{ position: 'relative' }}>
             <div {...getRootProps({ style })}>
                 <input {...getInputProps()} />
-                <p style={labelStyle}>{lastResult[1]}</p>
+                <p style={labelStyle}>
+                    {imageUrl
+                        ? 'Image accepted'
+                        : lastResult === 'rejected'
+                        ? 'Image rejected'
+                        : "Drag 'n' drop an image here"}
+                </p>
             </div>
+            {imageUrl && (
+                <IconButton
+                    onClick={() => {
+                        if (inputRef.current) {
+                            inputRef.current.value = '';
+                        }
+                        URL.revokeObjectURL(imageUrl);
+                        setImageUrl('');
+                        props.onChange([]);
+                    }}
+                    style={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                    }}
+                >
+                    <CloseIcon />
+                </IconButton>
+            )}
         </div>
     );
 };
