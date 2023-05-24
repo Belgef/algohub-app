@@ -11,6 +11,170 @@
 import axios, { AxiosError } from 'axios';
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, CancelToken } from 'axios';
 
+export class LessonClient {
+    private instance: AxiosInstance;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, instance?: AxiosInstance) {
+
+        this.instance = instance ? instance : axios.create();
+
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "https://localhost:7224";
+
+    }
+
+    getAll(  cancelToken?: CancelToken | undefined): Promise<LessonViewModel[]> {
+        let url_ = this.baseUrl + "/Lesson";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetAll(_response);
+        });
+    }
+
+    protected processGetAll(response: AxiosResponse): Promise<LessonViewModel[]> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<LessonViewModel[]>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<LessonViewModel[]>(null as any);
+    }
+
+    addLesson(lesson: LessonCreateViewModel , cancelToken?: CancelToken | undefined): Promise<number | null> {
+        let url_ = this.baseUrl + "/Lesson";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (lesson.title !== null && lesson.title !== undefined)
+            content_.append("Title", lesson.title.toString());
+        if (lesson.lessonContent !== null && lesson.lessonContent !== undefined)
+            content_.append("LessonContent", lesson.lessonContent.toString());
+        if (lesson.image !== null && lesson.image !== undefined)
+            content_.append("Image", lesson.image);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processAddLesson(_response);
+        });
+    }
+
+    protected processAddLesson(response: AxiosResponse): Promise<number | null> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<number | null>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<number | null>(null as any);
+    }
+
+    get(problemId: number , cancelToken?: CancelToken | undefined): Promise<LessonViewModel> {
+        let url_ = this.baseUrl + "/Lesson/{problemId}";
+        if (problemId === undefined || problemId === null)
+            throw new Error("The parameter 'problemId' must be defined.");
+        url_ = url_.replace("{problemId}", encodeURIComponent("" + problemId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGet(_response);
+        });
+    }
+
+    protected processGet(response: AxiosResponse): Promise<LessonViewModel> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<LessonViewModel>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<LessonViewModel>(null as any);
+    }
+}
+
 export class ProblemClient {
     private instance: AxiosInstance;
     private baseUrl: string;
@@ -239,9 +403,7 @@ export class StoreClient {
         }
         if (status === 200) {
             const _responseText = response.data;
-            let result200: any = null;
-            let resultData200  = _responseText;
-            result200 = JSON.parse(resultData200);
+            let result200: any = _responseText;
             return Promise.resolve<string>(result200);
 
         } else if (status !== 200 && status !== 204) {
@@ -571,6 +733,18 @@ export class UserClient {
     }
 }
 
+export interface LessonViewModel {
+    lessonId: number;
+    title: string;
+    lessonContent: ContentElement[];
+    author?: UserViewModel | undefined;
+    imageName?: string | undefined;
+    views: number;
+    upvotes: number;
+    downvotes: number;
+    createDate: Date;
+}
+
 export interface ProblemViewModel {
     problemId: number;
     problemName: string;
@@ -643,12 +817,18 @@ export interface UserRefreshTokenViewModel {
 }
 
 export interface ProblemCreateViewModel {
-    problemName: string | null | undefined, 
-    problemContent: string | null | undefined, 
-    image: File | null | undefined, 
-    timeLimitMs: number | undefined, 
-    memoryLimitBytes: number | undefined
-    testsString: string | null | undefined
+    problemName: string | null | undefined;
+    problemContent: string | null | undefined;
+    image: File | null | undefined;
+    timeLimitMs: number | undefined;
+    memoryLimitBytes: number | undefined;
+    testsString: string | null | undefined;
+}
+
+export interface LessonCreateViewModel {
+    title: string | null | undefined;
+    lessonContent: string | null | undefined;
+    image: File | null | undefined;
 }
 
 export interface TestViewModel {

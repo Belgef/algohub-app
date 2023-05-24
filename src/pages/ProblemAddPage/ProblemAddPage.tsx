@@ -23,7 +23,6 @@ import {
     ContentCreateElement,
     ContentElement,
     ContentType,
-    ProblemCreateViewModel,
     TestViewModel,
 } from '../../api/api';
 import { storeClient } from '../../api/clients';
@@ -80,15 +79,17 @@ const ProblemAddPage = () => {
     const onSubmit = async (problem: ProblemCreate) => {
         console.log(problem);
         const newContent: ContentElement[] = [];
-        for(let i = 0; i < (problem.problemContent?.length??0); i++) {
+        for (let i = 0; i < (problem.problemContent?.length ?? 0); i++) {
             const imageName =
-            problem.problemContent![i].contentType === ContentType.Image ? await storeClient.uploadImage(problem.problemContent![i].image) : undefined;
+                problem.problemContent![i].contentType === ContentType.Image
+                    ? await storeClient.uploadImage(problem.problemContent![i].image)
+                    : undefined;
             newContent.push({
                 ...problem.problemContent![i],
                 imageName: imageName,
-            })
+            });
         }
-        
+
         const result = await addProblem({
             ...problem,
             problemContent: JSON.stringify(newContent),

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { IAuthTokens, TokenRefreshRequest, applyAuthTokenInterceptor, getAccessToken } from 'axios-jwt';
 
-import { ProblemClient, StoreClient, UserClient } from './api';
+import { LessonClient, ProblemClient, StoreClient, UserClient } from './api';
 
 export const axiosInstance = axios.create();
 
@@ -31,4 +31,5 @@ axiosInstance.interceptors.response.use((config) => {
 
 export const userClient = new UserClient(undefined, axiosInstance);
 export const problemClient = new ProblemClient(undefined, axiosInstance);
+export const lessonClient = new LessonClient(undefined, axiosInstance);
 export const storeClient = new StoreClient(undefined, axiosInstance);

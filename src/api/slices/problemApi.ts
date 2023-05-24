@@ -1,6 +1,7 @@
-import { problemClient } from '../clients';
 import { createApi } from '@reduxjs/toolkit/query/react';
+
 import { ProblemCreateViewModel, ProblemViewModel } from '../api';
+import { problemClient } from '../clients';
 
 export const problemApi = createApi({
     reducerPath: 'problemApi',
@@ -17,7 +18,7 @@ export const problemApi = createApi({
         }),
         addProblem: builder.mutation<number | null, ProblemCreateViewModel>({
             queryFn: async (problem) => ({ data: await problemClient.addProblem(problem) }),
-            invalidatesTags: ['Problem'],
+            invalidatesTags: ['Problem', 'Problems'],
         }),
     }),
 });

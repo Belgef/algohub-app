@@ -19,13 +19,15 @@ import React from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import { ContentCreateElement, ContentType, ProblemCreateViewModel } from '../../api/api';
+import { ContentCreateElement, ContentElement, ContentType } from '../../api/api';
+import { storeClient } from '../../api/clients';
+import { useAddLessonMutation } from '../../api/slices/lessonApi';
 import StyledDropzone from '../../components/Dropzone/Dropzone';
 import useAuthorization from '../../hooks/useAuthorization';
 
 export interface LessonCreate {
-    problemName: string | null | undefined;
-    problemContent: ContentCreateElement[];
+    title: string | null | undefined;
+    lessonContent: ContentCreateElement[];
     image: File | null | undefined;
 }
 
@@ -35,7 +37,7 @@ const LessonAddPage = () => {
     const { control, handleSubmit } = useForm<LessonCreate>();
     const contentFieldMethods = useFieldArray({
         control,
-        name: 'problemContent',
+        name: 'lessonContent',
         rules: {
             required: {
                 value: true,
@@ -50,13 +52,30 @@ const LessonAddPage = () => {
 
     const navigate = useNavigate();
 
+    const [addLesson] = useAddLessonMutation();
+
     const onSubmit = async (lesson: LessonCreate) => {
         console.log(lesson);
-        // const result = await addLesson(Lesson);
+        const newContent: ContentElement[] = [];
+        for (let i = 0; i < (lesson.lessonContent?.length ?? 0); i++) {
+            const imageName =
+                lesson.lessonContent![i].contentType === ContentType.Image
+                    ? await storeClient.uploadImage(lesson.lessonContent![i].image)
+                    : undefined;
+            newContent.push({
+                ...lesson.lessonContent![i],
+                imageName: imageName,
+            });
+        }
 
-        // if ('data' in result) {
-        //     navigate('/Lessons/' + result.data);
-        // }
+        const result = await addLesson({
+            ...lesson,
+            lessonContent: JSON.stringify(newContent),
+        });
+
+        if ('data' in result) {
+            navigate('/Lessons/' + result.data);
+        }
     };
 
     return (
@@ -79,7 +98,7 @@ const LessonAddPage = () => {
                 />
                 <Controller
                     control={control}
-                    name='problemName'
+                    name='title'
                     render={({ field, fieldState }) => (
                         <TextField
                             autoFocus
@@ -144,7 +163,7 @@ const LessonAddPage = () => {
                                 {field.contentType === ContentType.Image && (
                                     <Controller
                                         control={control}
-                                        name={`problemContent.${index}.image`}
+                                        name={`lessonContent.${index}.image`}
                                         render={(fldProps) => (
                                             <StyledDropzone
                                                 onChange={(files, e) => {
@@ -161,7 +180,7 @@ const LessonAddPage = () => {
                                 {field.contentType !== ContentType.Bar && field.contentType !== ContentType.Code && (
                                     <Controller
                                         control={control}
-                                        name={`problemContent.${index}.value`}
+                                        name={`lessonContent.${index}.value`}
                                         render={(fldProps) => (
                                             <TextField
                                                 margin='dense'
@@ -185,7 +204,7 @@ const LessonAddPage = () => {
                         ))}
                         <Controller
                             control={control}
-                            name='problemContent'
+                            name='lessonContent'
                             render={({ field, fieldState }) => (
                                 <>
                                     {fieldState.error?.root?.message && (
