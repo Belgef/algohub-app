@@ -47,6 +47,7 @@ const labelStyle = {
 type DropzoneProps = {
     onChange: (files: File[], ...error: any[]) => void;
     error?: boolean;
+    fullHeight?: boolean;
 };
 
 type DropResult = 'idle' | 'rejected';
@@ -79,14 +80,15 @@ const StyledDropzone = (props: DropzoneProps) => {
             backgroundSize: 'contain' as const,
             backgroundRepeat: 'no-repeat' as const,
             backgroundPosition: 'center' as const,
-            height: imageUrl ? 300 : 100,
+            height: props.fullHeight ? 'calc(100% - 12px)' : imageUrl ? 300 : 100,
             transition: 'all 0.5s ease-in-out',
+            boxSizing: 'border-box' as const,
         }),
-        [isFocused, isDragAccept, isDragReject, props.error, lastResult, imageUrl]
+        [isFocused, isDragAccept, isDragReject, props.error, lastResult, imageUrl, props.fullHeight]
     );
 
     return (
-        <div className='container' style={{ position: 'relative' }}>
+        <div className='container' style={{ position: 'relative', flexGrow: 1 }}>
             <div {...getRootProps({ style })}>
                 <input {...getInputProps()} />
                 <p style={labelStyle}>

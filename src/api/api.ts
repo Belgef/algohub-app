@@ -89,6 +89,8 @@ export class ProblemClient {
             throw new Error("The parameter 'memoryLimitBytes' cannot be null.");
         else
             content_.append("MemoryLimitBytes", problem.memoryLimitBytes.toString());
+        if (problem.tests !== null && problem.tests !== undefined)
+            problem.tests.forEach(item_ => content_.append("Tests", item_.toString()));
 
         let options_: AxiosRequestConfig = {
             data: content_,
@@ -505,7 +507,7 @@ export class UserClient {
 export interface ProblemViewModel {
     problemId: number;
     problemName: string;
-    problemContent: string;
+    problemContent: ContentElement[];
     author?: UserViewModel | undefined;
     imageName?: string | undefined;
     views: number;
@@ -526,10 +528,17 @@ export interface UserViewModel {
     iconName?: string | undefined;
 }
 
-export interface ContentElement {
+export interface ContentCreateElement {
     contentType: ContentType;
     value?: string | undefined;
     image?: File | undefined;
+    code?: string | undefined;
+}
+
+export interface ContentElement {
+    contentType: ContentType;
+    value?: string | undefined;
+    imageName?: string | undefined;
     code?: string | undefined;
 }
 
@@ -568,11 +577,17 @@ export interface UserRefreshTokenViewModel {
 
 export interface ProblemCreateViewModel {
     problemName: string | null | undefined, 
-    problemContent: ContentElement[] | null | undefined, 
+    problemContent: ContentCreateElement[] | null | undefined, 
     authorId: string | undefined, 
     image: File | null | undefined, 
     timeLimitMs: number | undefined, 
     memoryLimitBytes: number | undefined
+    tests: TestViewModel[] | undefined
+}
+
+export interface TestViewModel {
+    input: string | undefined,
+    output: string | undefined
 }
 
 export class ApiException extends Error {

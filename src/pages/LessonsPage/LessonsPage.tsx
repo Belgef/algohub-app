@@ -21,14 +21,12 @@ import {
     Toolbar,
     Typography,
 } from '@mui/material';
-import { useGetProblemsQuery } from '../../api/slices/problemApi';
-import { STORAGE_BASE_URL } from '../../api/constants';
 import { NavLink } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/AddCircle';
 import SearchIcon from '@mui/icons-material/Search';
 
-const ProblemsPage = () => {
-    const problems = useGetProblemsQuery();
+const LessonsPage = () => {
+    //const lessons = useGetProblemsQuery();
 
     return (
         <Container maxWidth='lg'>
@@ -41,7 +39,7 @@ const ProblemsPage = () => {
                 mb={'0.5em'}
             >
                 <Typography variant='h4' component='h4'>
-                    Problems{' '}
+                    Lessons{' '}
                     <IconButton size='small' component={NavLink} to='add'>
                         <AddIcon sx={{ fontSize: 24 }} />
                     </IconButton>
@@ -49,7 +47,7 @@ const ProblemsPage = () => {
                 <Paper component='form' sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 400 }}>
                     <InputBase
                         sx={{ ml: 1, flex: 1 }}
-                        placeholder='Search problems'
+                        placeholder='Search lessons'
                         inputProps={{ 'aria-label': 'search google maps' }}
                     />
                     <IconButton type='button' sx={{ p: '10px' }} aria-label='search'>
@@ -84,7 +82,7 @@ const ProblemsPage = () => {
                             />
                             <CardContent>
                                 <Typography gutterBottom variant='h5' component='div'>
-                                    {'Problem ' + (i + 1)}
+                                    {'Lesson ' + (i + 1)}
                                 </Typography>
                                 <Stack direction={'row'} gap={0.5}>
                                     <Chip size='small' label='tag1' color='primary' />
@@ -120,4 +118,4 @@ const ProblemsPage = () => {
     );
 };
 
-export default ProblemsPage;
+export default LessonsPage;

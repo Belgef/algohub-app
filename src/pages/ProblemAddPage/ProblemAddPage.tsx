@@ -7,6 +7,7 @@ import {
     Container,
     Divider,
     IconButton,
+    Stack,
     TextField,
     Toolbar,
     Typography,
@@ -26,9 +27,23 @@ const ProblemAddPage = () => {
     useAuthorization('User');
 
     const { control, handleSubmit } = useForm<ProblemCreateViewModel>();
-    const { fields, append, remove, swap } = useFieldArray({
+    const contentFieldMethods = useFieldArray({
         control,
         name: 'problemContent',
+        rules: {
+            required: {
+                value: true,
+                message: 'The content is required',
+            },
+            maxLength: {
+                value: 30,
+                message: 'Max number of content elements exceeded',
+            },
+        },
+    });
+    const testFieldMethods = useFieldArray({
+        control,
+        name: 'tests',
         rules: {
             required: {
                 value: true,
@@ -56,110 +71,124 @@ const ProblemAddPage = () => {
 
     return (
         <Container maxWidth='lg'>
-            <form onSubmit={handleSubmit(onSubmit, (err) => console.log(err))}>
-                <Typography gutterBottom mt='1em' variant='h4' component='h4'>
-                    Create new problem
-                </Typography>
-                <Controller
-                    control={control}
-                    name='problemName'
-                    render={({ field, fieldState }) => (
-                        <TextField
-                            autoFocus
-                            margin='dense'
-                            label='Title'
-                            type='text'
-                            fullWidth
-                            variant='outlined'
-                            {...field}
-                            error={fieldState.invalid}
-                            helperText={fieldState.error?.message}
-                        />
-                    )}
-                    rules={{
-                        required: { value: true, message: 'Problem title is required' },
-                        minLength: { value: 5, message: 'Problem title must be at least 5 symbols long' },
-                        maxLength: { value: 100, message: 'Problem title cannot exceed 100 symbols' },
-                        pattern: {
-                            value: /^[\S ]+$/,
-                            message: 'Problem title must not contain tabs or enters',
-                        },
-                    }}
-                />
-                <Controller
-                    control={control}
-                    name='image'
-                    render={({ field, fieldState }) => (
-                        <StyledDropzone
-                            onChange={(files, e) => {
-                                field.onChange(e);
+            <Typography gutterBottom mt='1em' variant='h4' component='h4'>
+                Create new problem
+            </Typography>
+            <Stack gap={2} component='form' onSubmit={handleSubmit(onSubmit, (err) => console.log(err))}>
+                <Stack direction={'row'} width={'100%'} gap={'2em'}>
+                    <Stack>
+                        <Controller
+                            control={control}
+                            name='problemName'
+                            render={({ field, fieldState }) => (
+                                <TextField
+                                    autoFocus
+                                    margin='dense'
+                                    label='Title'
+                                    type='text'
+                                    fullWidth
+                                    variant='outlined'
+                                    {...field}
+                                    error={fieldState.invalid}
+                                    helperText={fieldState.error?.message}
+                                />
+                            )}
+                            rules={{
+                                required: { value: true, message: 'Problem title is required' },
+                                minLength: { value: 5, message: 'Problem title must be at least 5 symbols long' },
+                                maxLength: { value: 100, message: 'Problem title cannot exceed 100 symbols' },
+                                pattern: {
+                                    value: /^[\S ]+$/,
+                                    message: 'Problem title must not contain tabs or enters',
+                                },
                             }}
-                            error={fieldState.invalid}
                         />
-                    )}
-                />
-                <Controller
-                    control={control}
-                    name='timeLimitMs'
-                    render={({ field, fieldState }) => (
-                        <TextField
-                            margin='dense'
-                            sx={{ marginRight: '1em' }}
-                            label='Time limit (milliseconds)'
-                            type='number'
-                            variant='outlined'
-                            {...field}
-                            error={fieldState.invalid}
-                            helperText={fieldState.error?.message}
-                        />
-                    )}
-                    rules={{
-                        required: { value: true, message: 'Time limit is required' },
-                        min: { value: 1, message: 'Time limit must be at least 1 millisecond' },
-                        max: { value: 10240, message: 'Time limit cannot exceed 60000 millisecond (1 minute)' },
-                        pattern: {
-                            value: /^[^.,]+$/,
-                            message: 'Time limit must be a whole number',
-                        },
-                    }}
-                />
-                <Controller
-                    control={control}
-                    name='memoryLimitBytes'
-                    render={({ field, fieldState }) => (
-                        <TextField
-                            margin='dense'
-                            label='Memory limit (bytes)'
-                            type='number'
-                            variant='outlined'
-                            {...field}
-                            error={fieldState.invalid}
-                            helperText={fieldState.error?.message}
-                        />
-                    )}
-                    rules={{
-                        required: { value: true, message: 'Memory limit is required' },
-                        min: { value: 1, message: 'Memory limit must be at least 1 byte' },
-                        max: { value: 10240, message: 'Memory limit cannot exceed 10240 bytes (10 Mb)' },
-                        pattern: {
-                            value: /^[^.,]+$/,
-                            message: 'Memory limit must be a whole number',
-                        },
-                    }}
-                />
-                <Card elevation={8}>
+                        <Stack direction={'row'} width={'100%'}>
+                            <Controller
+                                control={control}
+                                name='timeLimitMs'
+                                render={({ field, fieldState }) => (
+                                    <TextField
+                                        fullWidth
+                                        margin='dense'
+                                        sx={{ marginRight: '1em' }}
+                                        label='Time limit (milliseconds)'
+                                        type='number'
+                                        variant='outlined'
+                                        size='small'
+                                        {...field}
+                                        error={fieldState.invalid}
+                                        helperText={fieldState.error?.message}
+                                    />
+                                )}
+                                rules={{
+                                    required: { value: true, message: 'Time limit is required' },
+                                    min: { value: 1, message: 'Time limit must be at least 1 millisecond' },
+                                    max: {
+                                        value: 10240,
+                                        message: 'Time limit cannot exceed 60000 millisecond (1 minute)',
+                                    },
+                                    pattern: {
+                                        value: /^[^.,]+$/,
+                                        message: 'Time limit must be a whole number',
+                                    },
+                                }}
+                            />
+                            <Controller
+                                control={control}
+                                name='memoryLimitBytes'
+                                render={({ field, fieldState }) => (
+                                    <TextField
+                                        fullWidth
+                                        margin='dense'
+                                        label='Memory limit (bytes)'
+                                        type='number'
+                                        variant='outlined'
+                                        size='small'
+                                        {...field}
+                                        error={fieldState.invalid}
+                                        helperText={fieldState.error?.message}
+                                    />
+                                )}
+                                rules={{
+                                    required: { value: true, message: 'Memory limit is required' },
+                                    min: { value: 1, message: 'Memory limit must be at least 1 byte' },
+                                    max: { value: 10240, message: 'Memory limit cannot exceed 10240 bytes (10 Mb)' },
+                                    pattern: {
+                                        value: /^[^.,]+$/,
+                                        message: 'Memory limit must be a whole number',
+                                    },
+                                }}
+                            />
+                        </Stack>
+                    </Stack>
+                    <Controller
+                        control={control}
+                        name='image'
+                        render={({ field, fieldState }) => (
+                            <StyledDropzone
+                                onChange={(files, e) => {
+                                    field.onChange(e);
+                                }}
+                                error={fieldState.invalid}
+                                fullHeight
+                            />
+                        )}
+                    />
+                </Stack>
+                <Card elevation={1}>
                     <CardContent>
                         <Typography variant='h5'>Content</Typography>
                     </CardContent>
                     <CardContent>
-                        {fields.map((field, index) => (
+                        {contentFieldMethods.fields.map((field, index) => (
                             <div key={field.id}>
                                 <Typography variant='h6'>
                                     <Toolbar disableGutters>
                                         {ContentType[field.contentType]}
                                         <IconButton
                                             onClick={() => {
-                                                swap(index, index - 1);
+                                                contentFieldMethods.swap(index, index - 1);
                                             }}
                                             size='small'
                                             disabled={index === 0}
@@ -168,16 +197,16 @@ const ProblemAddPage = () => {
                                         </IconButton>
                                         <IconButton
                                             onClick={() => {
-                                                swap(index, index + 1);
+                                                contentFieldMethods.swap(index, index + 1);
                                             }}
                                             size='small'
-                                            disabled={index === fields.length - 1}
+                                            disabled={index === contentFieldMethods.fields.length - 1}
                                         >
                                             <MoveDownIcon />
                                         </IconButton>
                                         <IconButton
                                             onClick={() => {
-                                                remove(index);
+                                                contentFieldMethods.remove(index);
                                             }}
                                             size='small'
                                         >
@@ -245,7 +274,7 @@ const ProblemAddPage = () => {
                         ).map((key) => (
                             <Button
                                 key={key}
-                                onClick={() => append({ contentType: ContentType[key] })}
+                                onClick={() => contentFieldMethods.append({ contentType: ContentType[key] })}
                                 sx={{ my: 1, display: 'block' }}
                             >
                                 New {key}
@@ -253,10 +282,95 @@ const ProblemAddPage = () => {
                         ))}
                     </CardActions>
                 </Card>
+                <Card elevation={1}>
+                    <CardContent>
+                        <Typography variant='h5'>Tests</Typography>
+                    </CardContent>
+                    <CardContent>
+                        {testFieldMethods.fields.map((field, index) => (
+                            <div key={field.id}>
+                                <Typography variant='h6'>
+                                    <Toolbar disableGutters>
+                                        {index + 1}.
+                                        <IconButton
+                                            onClick={() => {
+                                                testFieldMethods.remove(index);
+                                            }}
+                                            size='small'
+                                        >
+                                            <RemoveIcon />
+                                        </IconButton>
+                                    </Toolbar>
+                                </Typography>
+                                <Stack direction={'row'} width={'100%'} gap={'1em'}>
+                                    <Controller
+                                        control={control}
+                                        name={`tests.${index}.input`}
+                                        render={(fldProps) => (
+                                            <TextField
+                                                fullWidth
+                                                margin='dense'
+                                                label='Enter input'
+                                                type='text'
+                                                multiline
+                                                variant='outlined'
+                                                {...fldProps.field}
+                                                error={fldProps.fieldState.invalid}
+                                                helperText={fldProps.fieldState.error?.message}
+                                            />
+                                        )}
+                                        rules={{
+                                            required: { value: true, message: 'This field is required' },
+                                        }}
+                                    />
+                                    <Controller
+                                        control={control}
+                                        name={`tests.${index}.output`}
+                                        render={(fldProps) => (
+                                            <TextField
+                                                fullWidth
+                                                margin='dense'
+                                                label='Enter output'
+                                                type='text'
+                                                multiline
+                                                variant='outlined'
+                                                {...fldProps.field}
+                                                error={fldProps.fieldState.invalid}
+                                                helperText={fldProps.fieldState.error?.message}
+                                            />
+                                        )}
+                                        rules={{
+                                            required: { value: true, message: 'This field is required' },
+                                        }}
+                                    />
+                                </Stack>
+                            </div>
+                        ))}
+                        <Controller
+                            control={control}
+                            name='tests'
+                            render={({ field, fieldState }) => (
+                                <>
+                                    {fieldState.error?.root?.message && (
+                                        <Alert severity='error'>{fieldState.error?.root?.message}</Alert>
+                                    )}
+                                </>
+                            )}
+                        />
+                    </CardContent>
+                    <CardActions>
+                        <Button
+                            onClick={() => testFieldMethods.append({ input: '', output: '' })}
+                            sx={{ my: 1, display: 'block' }}
+                        >
+                            New test
+                        </Button>
+                    </CardActions>
+                </Card>
                 <Button fullWidth variant='contained' type='submit'>
                     Add problem
                 </Button>
-            </form>
+            </Stack>
         </Container>
     );
 };

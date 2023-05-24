@@ -10,7 +10,7 @@ const AppLayout = () => {
     return (
         <Container disableGutters maxWidth={false} sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             <Navbar />
-            <Container disableGutters sx={{ flexGrow: 1 }}>
+            <Container disableGutters maxWidth={false} sx={{ flexGrow: 1 }}>
                 <Outlet />
             </Container>
             <Paper component='footer' elevation={5} sx={{ p: '1.5em', borderRadius: 0, mt: '1em' }}>

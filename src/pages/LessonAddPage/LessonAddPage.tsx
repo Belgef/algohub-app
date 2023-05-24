@@ -1,0 +1,213 @@
+import {
+    Alert,
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    Container,
+    Divider,
+    IconButton,
+    Stack,
+    TextField,
+    Toolbar,
+    Typography,
+} from '@mui/material';
+import React from 'react';
+import useAuthorization from '../../hooks/useAuthorization';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import StyledDropzone from '../../components/Dropzone/Dropzone';
+import RemoveIcon from '@mui/icons-material/DeleteOutline';
+import MoveUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import MoveDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { ContentType, ProblemCreateViewModel } from '../../api/api';
+import { useNavigate } from 'react-router-dom';
+
+const LessonAddPage = () => {
+    useAuthorization('User');
+
+    const { control, handleSubmit } = useForm<ProblemCreateViewModel>();
+    const contentFieldMethods = useFieldArray({
+        control,
+        name: 'problemContent',
+        rules: {
+            required: {
+                value: true,
+                message: 'The content is required',
+            },
+            maxLength: {
+                value: 30,
+                message: 'Max number of content elements exceeded',
+            },
+        },
+    });
+
+    const navigate = useNavigate();
+
+    const onSubmit = async (lesson: ProblemCreateViewModel) => {
+        console.log(lesson);
+        // const result = await addLesson(Lesson);
+
+        // if ('data' in result) {
+        //     navigate('/Lessons/' + result.data);
+        // }
+    };
+
+    return (
+        <Container maxWidth='lg'>
+            <Typography gutterBottom mt='1em' variant='h4' component='h4'>
+                Create new lesson
+            </Typography>
+            <Stack gap={2} component='form' onSubmit={handleSubmit(onSubmit, (err) => console.log(err))}>
+                <Controller
+                    control={control}
+                    name='image'
+                    render={({ field, fieldState }) => (
+                        <StyledDropzone
+                            onChange={(files, e) => {
+                                field.onChange(e);
+                            }}
+                            error={fieldState.invalid}
+                        />
+                    )}
+                />
+                <Controller
+                    control={control}
+                    name='problemName'
+                    render={({ field, fieldState }) => (
+                        <TextField
+                            autoFocus
+                            margin='dense'
+                            label='Title'
+                            type='text'
+                            fullWidth
+                            variant='outlined'
+                            {...field}
+                            error={fieldState.invalid}
+                            helperText={fieldState.error?.message}
+                        />
+                    )}
+                    rules={{
+                        required: { value: true, message: 'Lesson title is required' },
+                        minLength: { value: 5, message: 'Lesson title must be at least 5 symbols long' },
+                        maxLength: { value: 100, message: 'Lesson title cannot exceed 100 symbols' },
+                        pattern: {
+                            value: /^[\S ]+$/,
+                            message: 'Lesson title must not contain tabs or enters',
+                        },
+                    }}
+                />
+                <Card elevation={1}>
+                    <CardContent>
+                        <Typography variant='h5'>Content</Typography>
+                    </CardContent>
+                    <CardContent>
+                        {contentFieldMethods.fields.map((field, index) => (
+                            <div key={field.id}>
+                                <Typography variant='h6'>
+                                    <Toolbar disableGutters>
+                                        {ContentType[field.contentType]}
+                                        <IconButton
+                                            onClick={() => {
+                                                contentFieldMethods.swap(index, index - 1);
+                                            }}
+                                            size='small'
+                                            disabled={index === 0}
+                                        >
+                                            <MoveUpIcon />
+                                        </IconButton>
+                                        <IconButton
+                                            onClick={() => {
+                                                contentFieldMethods.swap(index, index + 1);
+                                            }}
+                                            size='small'
+                                            disabled={index === contentFieldMethods.fields.length - 1}
+                                        >
+                                            <MoveDownIcon />
+                                        </IconButton>
+                                        <IconButton
+                                            onClick={() => {
+                                                contentFieldMethods.remove(index);
+                                            }}
+                                            size='small'
+                                        >
+                                            <RemoveIcon />
+                                        </IconButton>
+                                    </Toolbar>
+                                </Typography>
+                                {field.contentType === ContentType.Image && (
+                                    <Controller
+                                        control={control}
+                                        name={`problemContent.${index}.image`}
+                                        render={(fldProps) => (
+                                            <StyledDropzone
+                                                onChange={(files, e) => {
+                                                    fldProps.field.onChange(e);
+                                                }}
+                                                error={fldProps.fieldState.invalid}
+                                            />
+                                        )}
+                                        rules={{
+                                            required: { value: true, message: 'Image is required here' },
+                                        }}
+                                    />
+                                )}
+                                {field.contentType !== ContentType.Bar && field.contentType !== ContentType.Code && (
+                                    <Controller
+                                        control={control}
+                                        name={`problemContent.${index}.value`}
+                                        render={(fldProps) => (
+                                            <TextField
+                                                margin='dense'
+                                                label={`Enter ${ContentType[field.contentType]}`}
+                                                type='text'
+                                                multiline
+                                                fullWidth
+                                                variant='outlined'
+                                                {...fldProps.field}
+                                                error={fldProps.fieldState.invalid}
+                                                helperText={fldProps.fieldState.error?.message}
+                                            />
+                                        )}
+                                        rules={{
+                                            required: { value: true, message: 'This field is required' },
+                                        }}
+                                    />
+                                )}
+                                {field.contentType === ContentType.Bar && <Divider />}
+                            </div>
+                        ))}
+                        <Controller
+                            control={control}
+                            name='problemContent'
+                            render={({ field, fieldState }) => (
+                                <>
+                                    {fieldState.error?.root?.message && (
+                                        <Alert severity='error'>{fieldState.error?.root?.message}</Alert>
+                                    )}
+                                </>
+                            )}
+                        />
+                    </CardContent>
+                    <CardActions>
+                        {(
+                            Object.keys(ContentType).filter((key) => key.length > 2) as Array<keyof typeof ContentType>
+                        ).map((key) => (
+                            <Button
+                                key={key}
+                                onClick={() => contentFieldMethods.append({ contentType: ContentType[key] })}
+                                sx={{ my: 1, display: 'block' }}
+                            >
+                                New {key}
+                            </Button>
+                        ))}
+                    </CardActions>
+                </Card>
+                <Button fullWidth variant='contained' type='submit'>
+                    Add lesson
+                </Button>
+            </Stack>
+        </Container>
+    );
+};
+
+export default LessonAddPage;
