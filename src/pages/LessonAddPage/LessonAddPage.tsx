@@ -1,3 +1,6 @@
+import RemoveIcon from '@mui/icons-material/DeleteOutline';
+import MoveDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import MoveUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import {
     Alert,
     Button,
@@ -13,19 +16,23 @@ import {
     Typography,
 } from '@mui/material';
 import React from 'react';
-import useAuthorization from '../../hooks/useAuthorization';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
-import StyledDropzone from '../../components/Dropzone/Dropzone';
-import RemoveIcon from '@mui/icons-material/DeleteOutline';
-import MoveUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import MoveDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { ContentType, ProblemCreateViewModel } from '../../api/api';
 import { useNavigate } from 'react-router-dom';
+
+import { ContentCreateElement, ContentType, ProblemCreateViewModel } from '../../api/api';
+import StyledDropzone from '../../components/Dropzone/Dropzone';
+import useAuthorization from '../../hooks/useAuthorization';
+
+export interface LessonCreate {
+    problemName: string | null | undefined;
+    problemContent: ContentCreateElement[];
+    image: File | null | undefined;
+}
 
 const LessonAddPage = () => {
     useAuthorization('User');
 
-    const { control, handleSubmit } = useForm<ProblemCreateViewModel>();
+    const { control, handleSubmit } = useForm<LessonCreate>();
     const contentFieldMethods = useFieldArray({
         control,
         name: 'problemContent',
@@ -43,7 +50,7 @@ const LessonAddPage = () => {
 
     const navigate = useNavigate();
 
-    const onSubmit = async (lesson: ProblemCreateViewModel) => {
+    const onSubmit = async (lesson: LessonCreate) => {
         console.log(lesson);
         // const result = await addLesson(Lesson);
 

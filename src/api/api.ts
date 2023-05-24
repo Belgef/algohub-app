@@ -24,7 +24,7 @@ export class ProblemClient {
 
     }
 
-    getAll(cancelToken?: CancelToken | undefined): Promise<ProblemViewModel[]> {
+    getAll(  cancelToken?: CancelToken | undefined): Promise<ProblemViewModel[]> {
         let url_ = this.baseUrl + "/Problem";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -78,7 +78,7 @@ export class ProblemClient {
         if (problem.problemName !== null && problem.problemName !== undefined)
             content_.append("ProblemName", problem.problemName.toString());
         if (problem.problemContent !== null && problem.problemContent !== undefined)
-            problem.problemContent.forEach(item_ => content_.append("ProblemContent", item_.toString()));
+            content_.append("ProblemContent", problem.problemContent.toString());
         if (problem.image !== null && problem.image !== undefined)
             content_.append("Image", problem.image);
         if (problem.timeLimitMs === null || problem.timeLimitMs === undefined)
@@ -89,8 +89,8 @@ export class ProblemClient {
             throw new Error("The parameter 'memoryLimitBytes' cannot be null.");
         else
             content_.append("MemoryLimitBytes", problem.memoryLimitBytes.toString());
-        if (problem.tests !== null && problem.tests !== undefined)
-            problem.tests.forEach(item_ => content_.append("Tests", item_.toString()));
+        if (problem.testsString !== null && problem.testsString !== undefined)
+            content_.append("TestsString", problem.testsString.toString());
 
         let options_: AxiosRequestConfig = {
             data: content_,
@@ -182,6 +182,73 @@ export class ProblemClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
         return Promise.resolve<ProblemViewModel>(null as any);
+    }
+}
+
+export class StoreClient {
+    private instance: AxiosInstance;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, instance?: AxiosInstance) {
+
+        this.instance = instance ? instance : axios.create();
+
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "https://localhost:7224";
+
+    }
+
+    uploadImage(image: File | null | undefined , cancelToken?: CancelToken | undefined): Promise<string> {
+        let url_ = this.baseUrl + "/Store";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (image !== null && image !== undefined)
+            content_.append("Image", image);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processUploadImage(_response);
+        });
+    }
+
+    protected processUploadImage(response: AxiosResponse): Promise<string> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<string>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<string>(null as any);
     }
 }
 
@@ -577,12 +644,11 @@ export interface UserRefreshTokenViewModel {
 
 export interface ProblemCreateViewModel {
     problemName: string | null | undefined, 
-    problemContent: ContentCreateElement[] | null | undefined, 
-    authorId: string | undefined, 
+    problemContent: string | null | undefined, 
     image: File | null | undefined, 
     timeLimitMs: number | undefined, 
     memoryLimitBytes: number | undefined
-    tests: TestViewModel[] | undefined
+    testsString: string | null | undefined
 }
 
 export interface TestViewModel {

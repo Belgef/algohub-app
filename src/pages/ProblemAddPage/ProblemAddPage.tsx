@@ -1,3 +1,6 @@
+import RemoveIcon from '@mui/icons-material/DeleteOutline';
+import MoveDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import MoveUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import {
     Alert,
     Button,
@@ -13,20 +16,34 @@ import {
     Typography,
 } from '@mui/material';
 import React from 'react';
-import useAuthorization from '../../hooks/useAuthorization';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
-import StyledDropzone from '../../components/Dropzone/Dropzone';
-import RemoveIcon from '@mui/icons-material/DeleteOutline';
-import MoveUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import MoveDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { ContentType, ProblemCreateViewModel } from '../../api/api';
-import { useAddProblemMutation } from '../../api/slices/problemApi';
 import { useNavigate } from 'react-router-dom';
+
+import {
+    ContentCreateElement,
+    ContentElement,
+    ContentType,
+    ProblemCreateViewModel,
+    TestViewModel,
+} from '../../api/api';
+import { storeClient } from '../../api/clients';
+import { useAddProblemMutation } from '../../api/slices/problemApi';
+import StyledDropzone from '../../components/Dropzone/Dropzone';
+import useAuthorization from '../../hooks/useAuthorization';
+
+export interface ProblemCreate {
+    problemName: string | null | undefined;
+    problemContent: ContentCreateElement[] | null | undefined;
+    image: File | null | undefined;
+    timeLimitMs: number | undefined;
+    memoryLimitBytes: number | undefined;
+    tests: TestViewModel[] | undefined;
+}
 
 const ProblemAddPage = () => {
     useAuthorization('User');
 
-    const { control, handleSubmit } = useForm<ProblemCreateViewModel>();
+    const { control, handleSubmit } = useForm<ProblemCreate>();
     const contentFieldMethods = useFieldArray({
         control,
         name: 'problemContent',
@@ -60,9 +77,23 @@ const ProblemAddPage = () => {
 
     const [addProblem] = useAddProblemMutation();
 
-    const onSubmit = async (problem: ProblemCreateViewModel) => {
+    const onSubmit = async (problem: ProblemCreate) => {
         console.log(problem);
-        const result = await addProblem(problem);
+        const newContent: ContentElement[] = [];
+        for(let i = 0; i < (problem.problemContent?.length??0); i++) {
+            const imageName =
+            problem.problemContent![i].contentType === ContentType.Image ? await storeClient.uploadImage(problem.problemContent![i].image) : undefined;
+            newContent.push({
+                ...problem.problemContent![i],
+                imageName: imageName,
+            })
+        }
+        
+        const result = await addProblem({
+            ...problem,
+            problemContent: JSON.stringify(newContent),
+            testsString: JSON.stringify(problem.tests),
+        });
 
         if ('data' in result) {
             navigate('/Problems/' + result.data);
