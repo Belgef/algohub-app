@@ -1,34 +1,38 @@
-import React, { useEffect } from 'react';
-import { ContentType, ProblemViewModel, UserViewModel } from '../../api/api';
+import 'highlight.js/styles/vs.css';
+
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import {
     Avatar,
-    Container,
-    Stack,
-    Typography,
+    Box,
     Card,
     CardContent,
     CardMedia,
-    Paper,
-    Divider,
     Chip,
-    Box,
-    Tabs,
-    Tab,
+    Container,
+    Divider,
     FormControl,
     InputLabel,
-    MenuItem,
-    Select,
-    Toolbar,
     Button as MUIButton,
+    MenuItem,
+    Paper,
+    Select,
+    Stack,
+    Tab,
+    Tabs,
+    Toolbar,
+    Typography,
 } from '@mui/material';
-import CodeBlock from '../../components/CodeBlock/CodeBlock';
 import hljs from 'highlight.js';
-import 'highlight.js/styles/vs.css';
+import React, { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { Button, Form } from 'semantic-ui-react';
+
+import { ContentType, UserViewModel } from '../../api/api';
+import { useGetProblemByIdQuery } from '../../api/slices/problemApi';
+import CodeBlock from '../../components/CodeBlock/CodeBlock';
 import Comments from '../../components/Comments/Comments';
 import Solves from '../../components/Solves/Solves';
-import { Form, Button } from 'semantic-ui-react';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 
 interface Comment {
     comment: string;
@@ -70,40 +74,43 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const ProblemPage = () => {
-    const problem: ProblemViewModel = {
-        problemId: 21,
-        problemName: 'A Palindromic Substrings',
-        problemContent: [
-            { contentType: ContentType.Subtitle, value: 'A problem' },
-            { contentType: ContentType.Emphasis, value: 'An Emphasis' },
-            {
-                contentType: ContentType.Paragraph,
-                value: 'Given a string s, return the number of palindromic substrings in it.\nA string is a palindrome when it reads the same backward as forward.\nA substring is a contiguous sequence of characters within the string.',
-            },
-            {
-                contentType: ContentType.Image,
-                imageName: 'fdsf',
-                value: 'Some caption',
-            },
-            { contentType: ContentType.Bar },
-            { contentType: ContentType.Subtitle, value: 'Examples' },
-            { contentType: ContentType.Code, value: 'javascript', code: 'console.log("Hello world!!!")' },
-        ],
-        createDate: new Date(Date.now()),
-        views: 78432,
-        solves: 2382,
-        upvotes: 3129,
-        downvotes: 23,
-        memoryLimitBytes: 2048,
-        timeLimitMs: 2000,
-        author: {
-            userId: '10',
-            fullName: 'Adriana Blanca',
-            email: 'dsfd',
-            userName: '@adriana',
-        },
-    };
-
+    const { id: idRaw } = useParams();
+    const id = Number(idRaw);
+    const { data: problem } = useGetProblemByIdQuery(id, { skip: isNaN(id) });
+    // const problem: ProblemViewModel = {
+    //     problemId: 21,
+    //     problemName: 'A Palindromic Substrings',
+    //     problemContent: [
+    //         { contentType: ContentType.Subtitle, value: 'A problem' },
+    //         { contentType: ContentType.Emphasis, value: 'An Emphasis' },
+    //         {
+    //             contentType: ContentType.Paragraph,
+    //             value: 'Given a string s, return the number of palindromic substrings in it.\nA string is a palindrome when it reads the same backward as forward.\nA substring is a contiguous sequence of characters within the string.',
+    //         },
+    //         {
+    //             contentType: ContentType.Image,
+    //             imageName: 'fdsf',
+    //             value: 'Some caption',
+    //         },
+    //         { contentType: ContentType.Bar },
+    //         { contentType: ContentType.Subtitle, value: 'Examples' },
+    //         { contentType: ContentType.Code, value: 'javascript', code: 'console.log("Hello world!!!")' },
+    //     ],
+    //     createDate: new Date(Date.now()),
+    //     views: 78432,
+    //     solves: 2382,
+    //     upvotes: 3129,
+    //     downvotes: 23,
+    //     memoryLimitBytes: 2048,
+    //     timeLimitMs: 2000,
+    //     author: {
+    //         userId: '10',
+    //         fullName: 'Adriana Blanca',
+    //         email: 'dsfd',
+    //         userName: '@adriana',
+    //     },
+    // };
+    console.log(problem);
     const users: UserViewModel[] = [
         {
             userId: '',
@@ -132,7 +139,7 @@ const ProblemPage = () => {
             replies: [
                 {
                     comment: 'Thanks!',
-                    author: problem.author!,
+                    author: problem?.author ?? { userId: '', userName: 'Unknown', email: '' },
                     replies: [{ comment: 'Reply to a reply', author: users[1] }],
                 },
             ],
@@ -157,7 +164,7 @@ const ProblemPage = () => {
                 <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'} mt='1em'>
                     <Stack>
                         <Typography gutterBottom variant='h4' component='div'>
-                            {problem.problemName}
+                            {problem?.problemName}
                         </Typography>
                         <Stack direction={'row'} alignItems={'center'} gap={0.5} ml={2}>
                             <Chip
@@ -173,17 +180,17 @@ const ProblemPage = () => {
                     <Stack direction={'row'} gap={2}>
                         <Stack gap={1} alignItems={'center'}>
                             <ThumbUpIcon fontSize='large' color='primary' />
-                            <Typography variant='body1'>{problem.upvotes}</Typography>
+                            <Typography variant='body1'>{problem?.upvotes ?? 0}</Typography>
                         </Stack>
                         <Stack gap={1} alignItems={'center'}>
                             <ThumbDownIcon fontSize='large' color='primary' />
-                            <Typography variant='body1'>{problem.downvotes}</Typography>
+                            <Typography variant='body1'>{problem?.downvotes ?? 0}</Typography>
                         </Stack>
                     </Stack>
                 </Stack>
                 <Container maxWidth='md'>
                     <Stack alignItems={'center'} my={4} gap={3}>
-                        {problem.problemContent.map((content, i) => (
+                        {problem?.problemContent?.map((content, i) => (
                             <>
                                 {content.contentType === ContentType.Subtitle && (
                                     <Typography variant='h5' component={'div'} alignSelf='stretch' key={i}>
