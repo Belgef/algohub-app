@@ -20,9 +20,17 @@ export const problemApi = createApi({
             queryFn: async (problem) => ({ data: await problemClient.addProblem(problem) }),
             invalidatesTags: ['Problem', 'Problems'],
         }),
+        voteForProblem: builder.mutation<number | null, { problemId: number; isUpvote: boolean }>({
+            queryFn: async (vote) => ({ data: await problemClient.addProblemVote(vote.problemId, vote.isUpvote) }),
+            invalidatesTags: ['Problem', 'Problems'],
+        }),
+        getVoteForProblem: builder.query<boolean | null, number>({
+            queryFn: async (problemId) => ({ data: await problemClient.getProblemVote(problemId) }),
+            providesTags: ['Problem'],
+        }),
     }),
 });
 
-export const { useGetProblemByIdQuery, useGetProblemsQuery, useAddProblemMutation } = problemApi;
+export const { useGetProblemByIdQuery, useGetProblemsQuery, useAddProblemMutation, useVoteForProblemMutation, useGetVoteForProblemQuery } = problemApi;
 
 export default problemApi;

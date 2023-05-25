@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { IAuthTokens, TokenRefreshRequest, applyAuthTokenInterceptor, getAccessToken } from 'axios-jwt';
 
-import { LessonClient, ProblemClient, StoreClient, UserClient } from './api';
+import { CommentClient, LessonClient, ProblemClient, StoreClient, UserClient } from './api';
 
 export const axiosInstance = axios.create();
 
@@ -33,3 +33,4 @@ export const userClient = new UserClient(undefined, axiosInstance);
 export const problemClient = new ProblemClient(undefined, axiosInstance);
 export const lessonClient = new LessonClient(undefined, axiosInstance);
 export const storeClient = new StoreClient(undefined, axiosInstance);
+export const commentClient = new CommentClient(undefined, axiosInstance);

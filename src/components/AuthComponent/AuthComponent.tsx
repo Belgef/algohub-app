@@ -1,11 +1,12 @@
-import { Box, Tooltip, IconButton, Avatar, Menu, MenuItem, Typography } from '@mui/material';
+import { Avatar, Box, IconButton, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
 import React from 'react';
+
+import { userClient } from '../../api/clients';
 import { STORAGE_BASE_URL } from '../../api/constants';
 import useAuth from '../../hooks/useAuth';
+import useAuthorization from '../../hooks/useAuthorization';
 import LoginDialog from '../LoginDialog/LoginDialog';
 import RegisterDialog from '../RegisterDialog/RegisterDialog';
-import { userClient } from '../../api/clients';
-import useAuthorization from '../../hooks/useAuthorization';
 
 const AuthComponent = () => {
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);

@@ -1,7 +1,8 @@
 import React from 'react';
-import { Header, Comment as CommentElement, Form, Button as SButton } from 'semantic-ui-react';
+import { Comment as CommentElement, Form, Header, Button as SButton } from 'semantic-ui-react';
+
 import CodeBlock from '../CodeBlock/CodeBlock';
-import Comments from '../Comments/Comments';
+import Comments from '../Comment/Comment';
 
 type Props = {};
 

@@ -20,9 +20,17 @@ export const lessonApi = createApi({
             queryFn: async (lesson) => ({ data: await lessonClient.addLesson(lesson) }),
             invalidatesTags: ['Lesson', 'Lessons'],
         }),
+        voteForLesson: builder.mutation<number | null, { lessonId: number; isUpvote: boolean }>({
+            queryFn: async (vote) => ({ data: await lessonClient.addLessonVote(vote.lessonId, vote.isUpvote) }),
+            invalidatesTags: ['Lesson', 'Lessons'],
+        }),
+        getVoteForLesson: builder.query<boolean | null, number>({
+            queryFn: async (lessonId) => ({ data: await lessonClient.getLessonVote(lessonId) }),
+            providesTags: ['Lesson'],
+        }),
     }),
 });
 
-export const { useGetLessonByIdQuery, useGetLessonsQuery, useAddLessonMutation } = lessonApi;
+export const { useGetLessonByIdQuery, useGetLessonsQuery, useAddLessonMutation, useVoteForLessonMutation, useGetVoteForLessonQuery } = lessonApi;
 
 export default lessonApi;

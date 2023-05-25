@@ -11,6 +11,341 @@
 import axios, { AxiosError } from 'axios';
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, CancelToken } from 'axios';
 
+export class CommentClient {
+    private instance: AxiosInstance;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, instance?: AxiosInstance) {
+
+        this.instance = instance ? instance : axios.create();
+
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "https://localhost:7224";
+
+    }
+
+    getLessonComments(lessonId: number | undefined , cancelToken?: CancelToken | undefined): Promise<LessonCommentViewModel[]> {
+        let url_ = this.baseUrl + "/LessonComments?";
+        if (lessonId === null)
+            throw new Error("The parameter 'lessonId' cannot be null.");
+        else if (lessonId !== undefined)
+            url_ += "lessonId=" + encodeURIComponent("" + lessonId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetLessonComments(_response);
+        });
+    }
+
+    protected processGetLessonComments(response: AxiosResponse): Promise<LessonCommentViewModel[]> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<LessonCommentViewModel[]>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<LessonCommentViewModel[]>(null as any);
+    }
+
+    addLessonComment(comment: CommentCreateViewModel, cancelToken?: CancelToken | undefined): Promise<number | null> {
+        let url_ = this.baseUrl + "/LessonComments";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (comment.rootId === null || comment.rootId === undefined)
+            throw new Error("The parameter 'lessonId' cannot be null.");
+        else
+            content_.append("LessonId", comment.rootId.toString());
+        if (comment.parentCommentId !== null && comment.parentCommentId !== undefined)
+            content_.append("ParentCommentId", comment.parentCommentId.toString());
+        if (comment.content !== null && comment.content !== undefined)
+            content_.append("Content", comment.content.toString());
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processAddLessonComment(_response);
+        });
+    }
+
+    protected processAddLessonComment(response: AxiosResponse): Promise<number | null> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<number | null>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<number | null>(null as any);
+    }
+
+    getProblemComments(problemId: number | undefined , cancelToken?: CancelToken | undefined): Promise<ProblemCommentViewModel[]> {
+        let url_ = this.baseUrl + "/ProblemComments?";
+        if (problemId === null)
+            throw new Error("The parameter 'problemId' cannot be null.");
+        else if (problemId !== undefined)
+            url_ += "problemId=" + encodeURIComponent("" + problemId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetProblemComments(_response);
+        });
+    }
+
+    protected processGetProblemComments(response: AxiosResponse): Promise<ProblemCommentViewModel[]> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<ProblemCommentViewModel[]>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ProblemCommentViewModel[]>(null as any);
+    }
+
+    addProblemComment(comment: CommentCreateViewModel, cancelToken?: CancelToken | undefined): Promise<number | null> {
+        let url_ = this.baseUrl + "/ProblemComments";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (comment.rootId === null || comment.rootId === undefined)
+            throw new Error("The parameter 'problemId' cannot be null.");
+        else
+            content_.append("ProblemId", comment.rootId.toString());
+        if (comment.parentCommentId !== null && comment.parentCommentId !== undefined)
+            content_.append("ParentCommentId", comment.parentCommentId.toString());
+        if (comment.content !== null && comment.content !== undefined)
+            content_.append("Content", comment.content.toString());
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processAddProblemComment(_response);
+        });
+    }
+
+    protected processAddProblemComment(response: AxiosResponse): Promise<number | null> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<number | null>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<number | null>(null as any);
+    }
+
+    getSolveComments(solveId: number | undefined , cancelToken?: CancelToken | undefined): Promise<SolveCommentViewModel[]> {
+        let url_ = this.baseUrl + "/SolveComments?";
+        if (solveId === null)
+            throw new Error("The parameter 'solveId' cannot be null.");
+        else if (solveId !== undefined)
+            url_ += "solveId=" + encodeURIComponent("" + solveId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetSolveComments(_response);
+        });
+    }
+
+    protected processGetSolveComments(response: AxiosResponse): Promise<SolveCommentViewModel[]> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<SolveCommentViewModel[]>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<SolveCommentViewModel[]>(null as any);
+    }
+
+    addSolveComment(comment: CommentCreateViewModel, cancelToken?: CancelToken | undefined): Promise<number | null> {
+        let url_ = this.baseUrl + "/SolveComments";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (comment.rootId === null || comment.rootId === undefined)
+            throw new Error("The parameter 'solveId' cannot be null.");
+        else
+            content_.append("SolveId", comment.rootId.toString());
+        if (comment.parentCommentId !== null && comment.parentCommentId !== undefined)
+            content_.append("ParentCommentId", comment.parentCommentId.toString());
+        if (comment.content !== null && comment.content !== undefined)
+            content_.append("Content", comment.content.toString());
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processAddSolveComment(_response);
+        });
+    }
+
+    protected processAddSolveComment(response: AxiosResponse): Promise<number | null> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<number | null>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<number | null>(null as any);
+    }
+}
+
 export class LessonClient {
     private instance: AxiosInstance;
     private baseUrl: string;
@@ -172,6 +507,113 @@ export class LessonClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
         return Promise.resolve<LessonViewModel>(null as any);
+    }
+
+    addLessonVote(id: number | undefined, isUpvote: boolean | undefined , cancelToken?: CancelToken | undefined): Promise<number | null> {
+        let url_ = this.baseUrl + "/Lesson/Vote";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (id === null || id === undefined)
+            throw new Error("The parameter 'id' cannot be null.");
+        else
+            content_.append("Id", id.toString());
+        if (isUpvote === null || isUpvote === undefined)
+            throw new Error("The parameter 'isUpvote' cannot be null.");
+        else
+            content_.append("IsUpvote", isUpvote.toString());
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processAddLessonVote(_response);
+        });
+    }
+
+    protected processAddLessonVote(response: AxiosResponse): Promise<number | null> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<number | null>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<number | null>(null as any);
+    }
+
+    getLessonVote(lessonId: number | undefined , cancelToken?: CancelToken | undefined): Promise<boolean | null> {
+        let url_ = this.baseUrl + "/Lesson/Vote?";
+        if (lessonId === null)
+            throw new Error("The parameter 'lessonId' cannot be null.");
+        else if (lessonId !== undefined)
+            url_ += "lessonId=" + encodeURIComponent("" + lessonId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetLessonVote(_response);
+        });
+    }
+
+    protected processGetLessonVote(response: AxiosResponse): Promise<boolean | null> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<boolean | null>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<boolean | null>(null as any);
     }
 }
 
@@ -346,6 +788,113 @@ export class ProblemClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
         return Promise.resolve<ProblemViewModel>(null as any);
+    }
+
+    addProblemVote(id: number | undefined, isUpvote: boolean | undefined , cancelToken?: CancelToken | undefined): Promise<number | null> {
+        let url_ = this.baseUrl + "/Problem/Vote";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (id === null || id === undefined)
+            throw new Error("The parameter 'id' cannot be null.");
+        else
+            content_.append("Id", id.toString());
+        if (isUpvote === null || isUpvote === undefined)
+            throw new Error("The parameter 'isUpvote' cannot be null.");
+        else
+            content_.append("IsUpvote", isUpvote.toString());
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processAddProblemVote(_response);
+        });
+    }
+
+    protected processAddProblemVote(response: AxiosResponse): Promise<number | null> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<number | null>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<number | null>(null as any);
+    }
+
+    getProblemVote(problemId: number | undefined , cancelToken?: CancelToken | undefined): Promise<boolean | null> {
+        let url_ = this.baseUrl + "/Problem/Vote?";
+        if (problemId === null)
+            throw new Error("The parameter 'problemId' cannot be null.");
+        else if (problemId !== undefined)
+            url_ += "problemId=" + encodeURIComponent("" + problemId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetProblemVote(_response);
+        });
+    }
+
+    protected processGetProblemVote(response: AxiosResponse): Promise<boolean | null> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<boolean | null>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<boolean | null>(null as any);
     }
 }
 
@@ -731,6 +1280,57 @@ export class UserClient {
         }
         return Promise.resolve<boolean>(null as any);
     }
+}
+
+export interface LessonCommentViewModel {
+    lessonCommentId?: number | undefined;
+    lessonId?: number | undefined;
+    author?: UserViewModel | undefined;
+    content?: string | undefined;
+    createDate?: Date | undefined;
+    replies?: LessonCommentViewModel[] | undefined;
+}
+
+export interface UserViewModel {
+    userId: string;
+    userName: string;
+    fullName?: string | undefined;
+    email: string;
+    role?: string | undefined;
+    iconName?: string | undefined;
+}
+
+export interface ProblemCommentViewModel {
+    problemCommentId?: number | undefined;
+    problemId?: number | undefined;
+    author?: UserViewModel | undefined;
+    content?: string | undefined;
+    createDate?: Date | undefined;
+    replies?: ProblemCommentViewModel[] | undefined;
+}
+
+export interface SolveCommentViewModel {
+    solveCommentId?: number | undefined;
+    solveId?: number | undefined;
+    author?: UserViewModel | undefined;
+    content?: string | undefined;
+    createDate?: Date | undefined;
+    replies?: SolveCommentViewModel[] | undefined;
+}
+
+export interface CommentCreateViewModel {
+    rootId: number | undefined;
+    parentCommentId: number | null | undefined;
+    content: string | null | undefined;
+}
+
+export interface CommentViewModel {
+    id?: number | undefined;
+    rootId?: number | undefined;
+    author?: UserViewModel | undefined;
+    content?: string | undefined;
+    createDate?: Date | undefined;
+    replies?: CommentViewModel[] | undefined;
 }
 
 export interface LessonViewModel {

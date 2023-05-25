@@ -26,19 +26,12 @@ import {
 import hljs from 'highlight.js';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button, Form } from 'semantic-ui-react';
 
-import { ContentType, UserViewModel } from '../../api/api';
+import { ContentType } from '../../api/api';
 import { useGetProblemByIdQuery } from '../../api/slices/problemApi';
 import CodeBlock from '../../components/CodeBlock/CodeBlock';
-import Comments from '../../components/Comments/Comments';
+import CommentsSection from '../../components/CommentsSection/CommentsSection';
 import Solves from '../../components/Solves/Solves';
-
-interface Comment {
-    comment: string;
-    author: UserViewModel;
-    replies?: Comment[];
-}
 
 function a11yProps(index: number) {
     return {
@@ -110,45 +103,6 @@ const ProblemPage = () => {
     //         userName: '@adriana',
     //     },
     // };
-    console.log(problem);
-    const users: UserViewModel[] = [
-        {
-            userId: '',
-            fullName: 'User 1',
-            email: '',
-            userName: '',
-        },
-        {
-            userId: '',
-            fullName: 'User 2',
-            email: '',
-            userName: '',
-        },
-        {
-            userId: '',
-            fullName: 'User 3',
-            email: '',
-            userName: '',
-        },
-    ];
-
-    const comments: Comment[] = [
-        {
-            comment: 'Great riddle!',
-            author: users[0],
-            replies: [
-                {
-                    comment: 'Thanks!',
-                    author: problem?.author ?? { userId: '', userName: 'Unknown', email: '' },
-                    replies: [{ comment: 'Reply to a reply', author: users[1] }],
-                },
-            ],
-        },
-        {
-            comment: 'Comment 2',
-            author: users[2],
-        },
-    ];
 
     useEffect(() => hljs.highlightAll());
 
@@ -291,11 +245,7 @@ const ProblemPage = () => {
                     </Stack>
                 </TabPanel>
                 <TabPanel value={value} index={1}>
-                    <Comments />
-                    <Form reply>
-                        <Form.TextArea />
-                        <Button content='Add Reply' labelPosition='left' icon='edit' primary />
-                    </Form>
+                    <CommentsSection comments={[]} noTitle />
                 </TabPanel>
             </Container>
         </Container>

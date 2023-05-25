@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
 import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    TextField,
-    DialogActions,
-    Button,
     Avatar,
+    Button,
     CardHeader,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    TextField,
     Typography,
 } from '@mui/material';
+import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { UserCreateViewModel } from '../../api/api';
 import { useSearchParams } from 'react-router-dom';
-import StyledDropzone from '../Dropzone/Dropzone';
+
+import { UserCreateViewModel } from '../../api/api';
 import { userClient } from '../../api/clients';
+import StyledDropzone from '../Dropzone/Dropzone';
 
 export type RegisterDialogProps = {
     enabled: boolean;

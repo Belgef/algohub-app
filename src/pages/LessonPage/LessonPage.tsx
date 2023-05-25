@@ -2,107 +2,47 @@ import 'highlight.js/styles/vs.css';
 
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import {
-    Avatar,
-    Card,
-    CardContent,
-    CardMedia,
-    Chip,
-    Container,
-    Divider,
-    Paper,
-    Stack,
-    Typography,
-} from '@mui/material';
+import { Avatar, Chip, Container, IconButton, Stack, Typography } from '@mui/material';
 import hljs from 'highlight.js';
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Button, Form } from 'semantic-ui-react';
+import { useNavigate, useParams } from 'react-router-dom';
 
-import { ContentType, UserViewModel } from '../../api/api';
-import { useGetLessonByIdQuery } from '../../api/slices/lessonApi';
-import CodeBlock from '../../components/CodeBlock/CodeBlock';
-import Comments from '../../components/Comments/Comments';
+import { CommentViewModel, LessonCommentViewModel } from '../../api/api';
+import { STORAGE_BASE_URL } from '../../api/constants';
+import { useAddLessonCommentMutation, useGetLessonCommentsQuery } from '../../api/slices/commentApi';
+import { useGetLessonByIdQuery, useGetVoteForLessonQuery, useVoteForLessonMutation } from '../../api/slices/lessonApi';
+import CommentsSection from '../../components/CommentsSection/CommentsSection';
+import Content from '../../components/Content/Content';
+import useAuthorization from '../../hooks/useAuthorization';
 
-interface Comment {
-    comment: string;
-    author: UserViewModel;
-    replies?: Comment[];
-}
+const normalizeComments = (comments: LessonCommentViewModel[]): CommentViewModel[] =>
+    comments?.map((c) => ({
+        ...c,
+        id: c.lessonCommentId,
+        rootId: c.lessonId,
+        replies: c.replies ? normalizeComments(c.replies) : undefined,
+    }));
 
 const LessonPage = () => {
+    const user = useAuthorization();
     const { id: idRaw } = useParams();
     const id = Number(idRaw);
-    const { data: lesson } = useGetLessonByIdQuery(id, { skip: isNaN(id) });
-    // const lesson: LessonViewModel = {
-    //     lessonId: 21,
-    //     title: "Dijkstra's algorithm",
-    //     lessonContent: [
-    //         { contentType: ContentType.Subtitle, value: 'A problem' },
-    //         { contentType: ContentType.Emphasis, value: 'An Emphasis' },
-    //         {
-    //             contentType: ContentType.Paragraph,
-    //             value: 'Given a string s, return the number of palindromic substrings in it.\nA string is a palindrome when it reads the same backward as forward.\nA substring is a contiguous sequence of characters within the string.',
-    //         },
-    //         {
-    //             contentType: ContentType.Image,
-    //             imageName: 'fdsf',
-    //             value: 'Some caption',
-    //         },
-    //         { contentType: ContentType.Bar },
-    //         { contentType: ContentType.Subtitle, value: 'Examples' },
-    //         { contentType: ContentType.Code, value: 'javascript', code: 'console.log("Hello world!!!")' },
-    //     ],
-    //     createDate: new Date(Date.now()),
-    //     views: 78432,
-    //     upvotes: 3129,
-    //     downvotes: 23,
-    //     author: {
-    //         userId: '10',
-    //         fullName: 'Adriana Blanca',
-    //         email: 'dsfd',
-    //         userName: '@adriana',
-    //     },
-    // };
+    const { data: lesson, isLoading: lessonLoading } = useGetLessonByIdQuery(id, { skip: isNaN(id) });
+    const { data: comments } = useGetLessonCommentsQuery(id, { skip: isNaN(id) });
+    const { data: vote } = useGetVoteForLessonQuery(id, { skip: isNaN(id) });
+    const [addLessonComment] = useAddLessonCommentMutation();
+    const [voteForLesson] = useVoteForLessonMutation();
+    const navigate = useNavigate()
 
-    const users: UserViewModel[] = [
-        {
-            userId: '',
-            fullName: 'User 1',
-            email: '',
-            userName: '',
-        },
-        {
-            userId: '',
-            fullName: 'User 2',
-            email: '',
-            userName: '',
-        },
-        {
-            userId: '',
-            fullName: 'User 3',
-            email: '',
-            userName: '',
-        },
-    ];
+    if(!idRaw || (!lessonLoading && !lesson)){
+        navigate("/")
+    }
 
-    const comments: Comment[] = [
-        {
-            comment: 'Great riddle!',
-            author: users[0],
-            replies: [
-                {
-                    comment: 'Thanks!',
-                    author: lesson?.author ?? { userId: '', userName: 'Unknown', email: '' },
-                    replies: [{ comment: 'Reply to a reply', author: users[1] }],
-                },
-            ],
-        },
-        {
-            comment: 'Comment 2',
-            author: users[2],
-        },
-    ];
+    const normComments = comments ? normalizeComments(comments) : undefined;
+
+    const handleReply = (message: string, parentComment: number | undefined = undefined) => {
+        addLessonComment({ rootId: id, parentCommentId: parentComment, content: message });
+    };
 
     useEffect(() => hljs.highlightAll());
 
@@ -116,7 +56,17 @@ const LessonPage = () => {
                         </Typography>
                         <Stack direction={'row'} alignItems={'center'} gap={0.5} ml={2}>
                             <Chip
-                                avatar={<Avatar alt='Natacha' src={`https://loremflickr.com/240/240/man`} />}
+                                avatar={
+                                    <Avatar
+                                        alt={lesson?.author?.fullName}
+                                        src={
+                                            lesson?.author?.iconName
+                                                ? STORAGE_BASE_URL + lesson?.author.iconName
+                                                : 'https://ui-avatars.com/api/?rounded=true&name=' +
+                                                      lesson?.author?.fullName ?? lesson?.author?.userName
+                                        }
+                                    />
+                                }
                                 label={lesson?.author?.fullName}
                                 variant='outlined'
                             />
@@ -126,76 +76,30 @@ const LessonPage = () => {
                         </Stack>
                     </Stack>
                     <Stack direction={'row'} gap={2}>
-                        <Stack gap={1} alignItems={'center'}>
-                            <ThumbUpIcon fontSize='large' color='primary' />
+                        <Stack alignItems={'center'}>
+                            <IconButton
+                                onClick={() => voteForLesson({ lessonId: id, isUpvote: true })}
+                                disabled={!user || vote === true}
+                            >
+                                <ThumbUpIcon fontSize='large' color={vote === true ? 'primary' : undefined} />
+                            </IconButton>
                             <Typography variant='body1'>{lesson?.upvotes ?? 0}</Typography>
                         </Stack>
-                        <Stack gap={1} alignItems={'center'}>
-                            <ThumbDownIcon fontSize='large' color='primary' />
+                        <Stack alignItems={'center'}>
+                            <IconButton
+                                onClick={() => voteForLesson({ lessonId: id, isUpvote: false })}
+                                disabled={!user || vote === false}
+                            >
+                                <ThumbDownIcon fontSize='large' color={vote === false ? 'primary' : undefined} />
+                            </IconButton>
                             <Typography variant='body1'>{lesson?.downvotes ?? 0}</Typography>
                         </Stack>
                     </Stack>
                 </Stack>
-                <Container maxWidth='md'>
-                    <Stack alignItems={'center'} my={4} gap={3}>
-                        {lesson?.lessonContent?.map((content, i) => (
-                            <>
-                                {content.contentType === ContentType.Subtitle && (
-                                    <Typography variant='h5' component={'div'} alignSelf='stretch' key={i}>
-                                        {content.value}
-                                    </Typography>
-                                )}
-                                {content.contentType === ContentType.Emphasis && (
-                                    <Paper elevation={2} sx={{ mx: 2, alignSelf: 'stretch' }} key={i}>
-                                        <Typography
-                                            variant='body1'
-                                            component={'div'}
-                                            sx={{ fontStyle: 'italic', mx: 4, my: 2 }}
-                                        >
-                                            {content.value}
-                                        </Typography>
-                                    </Paper>
-                                )}
-                                {content.contentType === ContentType.Paragraph && (
-                                    <Typography
-                                        key={i}
-                                        variant='body1'
-                                        component={'div'}
-                                        sx={{ textIndent: 24, textAlign: 'justify' }}
-                                    >
-                                        {content.value}
-                                    </Typography>
-                                )}
-                                {content.contentType === ContentType.Image && (
-                                    <Card key={i}>
-                                        <CardMedia
-                                            image={`https://loremflickr.com/480/360/code`}
-                                            title='fsd'
-                                            sx={{ height: '24em', width: '36em' }}
-                                        />
-                                        <CardContent>{content.value}</CardContent>
-                                    </Card>
-                                )}
-                                {content.contentType === ContentType.Bar && (
-                                    <Divider key={i} sx={{ alignSelf: 'stretch' }} />
-                                )}
-                                {content.contentType === ContentType.Code && (
-                                    <CodeBlock key={i} code={content.code ?? ''} language={content.value} />
-                                )}
-                            </>
-                        ))}
-                    </Stack>
-                </Container>
+                <Content content={lesson?.lessonContent} />
             </Stack>
             <Container maxWidth='md'>
-                <Typography gutterBottom variant='h5' component='div' mt={'1em'}>
-                    Comments
-                </Typography>
-                <Comments />
-                <Form reply>
-                    <Form.TextArea />
-                    <Button content='Add Reply' labelPosition='left' icon='edit' primary />
-                </Form>
+                <CommentsSection comments={normComments} onReply={handleReply} />
             </Container>
         </Container>
     );

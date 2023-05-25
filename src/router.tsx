@@ -1,13 +1,14 @@
 import { createBrowserRouter } from 'react-router-dom';
+
 import AppLayout from './AppLayout';
 import HomePage from './pages/HomePage/HomePage';
-import ProblemsPage from './pages/ProblemsPage/ProblemsPage';
-import ProblemAddPage from './pages/ProblemAddPage/ProblemAddPage';
-import LessonsPage from './pages/LessonsPage/LessonsPage';
 import LessonAddPage from './pages/LessonAddPage/LessonAddPage';
-import ProblemPage from './pages/ProblemPage/ProblemPage';
 import LessonPage from './pages/LessonPage/LessonPage';
+import LessonsPage from './pages/LessonsPage/LessonsPage';
+import ProblemAddPage from './pages/ProblemAddPage/ProblemAddPage';
+import ProblemPage from './pages/ProblemPage/ProblemPage';
 import ProblemSolvePage from './pages/ProblemSolvePage/ProblemSolvePage';
+import ProblemsPage from './pages/ProblemsPage/ProblemsPage';
 
 export const router = createBrowserRouter([
     {
