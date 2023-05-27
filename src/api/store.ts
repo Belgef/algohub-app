@@ -3,6 +3,7 @@ import { Action, ThunkAction, configureStore } from '@reduxjs/toolkit';
 import commentApi from './slices/commentApi';
 import lessonApi from './slices/lessonApi';
 import problemApi from './slices/problemApi';
+import solveApi from './slices/solveApi';
 import userApi from './slices/userApi';
 
 export const store = configureStore({
@@ -11,13 +12,15 @@ export const store = configureStore({
         [problemApi.reducerPath]: problemApi.reducer,
         [lessonApi.reducerPath]: lessonApi.reducer,
         [commentApi.reducerPath]: commentApi.reducer,
+        [solveApi.reducerPath]: solveApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware()
         .concat(userApi.middleware)
         .concat(problemApi.middleware)
         .concat(lessonApi.middleware)
-        .concat(commentApi.middleware),
+        .concat(commentApi.middleware)
+        .concat(solveApi.middleware),
 });
 
 export type AppDispatch = typeof store.dispatch;

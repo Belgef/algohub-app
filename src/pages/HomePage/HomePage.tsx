@@ -1,5 +1,5 @@
-import React from 'react';
 import {
+    Box,
     Button,
     Card,
     CardActions,
@@ -9,10 +9,11 @@ import {
     Paper,
     Stack,
     Typography,
-    Box,
 } from '@mui/material';
-import { useGetProblemsQuery } from '../../api/slices/problemApi';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
+
+import { useGetProblemsQuery } from '../../api/slices/problemApi';
 
 const HomePage = () => {
     const problems = useGetProblemsQuery();
@@ -52,7 +53,7 @@ const HomePage = () => {
                                     <Card sx={{ width: 345 }} key={i}>
                                         <CardMedia
                                             sx={{ height: 140 }}
-                                            image={`https://loremflickr.com/320/240/coding?random=${i}${t}`}
+                                            image={`https://loremflickr.com/320/240/pipe?random=${i}${t}`}
                                             title={p.problemName}
                                         />
                                         <CardContent>

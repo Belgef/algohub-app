@@ -30,12 +30,12 @@ const Comment = (props: CommentsProps) => {
             />
             <CommentElement.Content>
                 <CommentElement.Author as='a'>
-                    {props.comment?.author?.fullName ?? '@' + props.comment?.author?.userName}
+                    {props.comment?.author?.fullName ?? '@' + props.comment?.author?.userName ?? 'deleted'}
                 </CommentElement.Author>
                 <CommentElement.Metadata>
                     <div>{moment.utc(props.comment?.createDate).local().calendar().toLocaleString()}</div>
                 </CommentElement.Metadata>
-                <CommentElement.Text>{props.comment?.content}</CommentElement.Text>
+                <CommentElement.Text className='prelined'>{props.comment?.content}</CommentElement.Text>
                 {user && (
                     <CommentElement.Actions>
                         <CommentElement.Action onClick={() => setReply(!reply)}>

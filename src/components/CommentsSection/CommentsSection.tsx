@@ -18,44 +18,6 @@ const CommentsSection = (props: CommentsSectionProps) => {
     const user = useAuthorization();
     const { control, handleSubmit, reset } = useForm<{ reply: string }>({ defaultValues: { reply: '' } });
 
-    // const users: UserViewModel[] = [
-    //     {
-    //         userId: '',
-    //         fullName: 'User 1',
-    //         email: '',
-    //         userName: '',
-    //     },
-    //     {
-    //         userId: '',
-    //         fullName: 'User 2',
-    //         email: '',
-    //         userName: '',
-    //     },
-    //     {
-    //         userId: '',
-    //         email: '',
-    //         userName: 'user3',
-    //     },
-    // ];
-
-    // const comments = [
-    //     {
-    //         content: 'Great riddle!',
-    //         author: users[0],
-    //         replies: [
-    //             {
-    //                 content: 'Thanks!',
-    //                 author: users[2],
-    //                 replies: [{ content: 'Reply to a reply', author: users[1] }],
-    //             },
-    //         ],
-    //     },
-    //     {
-    //         content: 'Comment 2',
-    //         author: users[2],
-    //     },
-    // ];
-
     return (
         <>
             {!props.noTitle && (

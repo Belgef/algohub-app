@@ -1,8 +1,7 @@
 import { Paper, Typography } from '@mui/material';
-import { escape } from 'querystring';
 
 type CodeBlockProps = {
-    code: string;
+    code?: string;
     language?: string;
 };
 

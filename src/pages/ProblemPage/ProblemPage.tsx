@@ -5,33 +5,39 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import {
     Avatar,
     Box,
-    Card,
-    CardContent,
-    CardMedia,
     Chip,
     Container,
-    Divider,
-    FormControl,
-    InputLabel,
+    IconButton,
     Button as MUIButton,
-    MenuItem,
-    Paper,
-    Select,
     Stack,
     Tab,
     Tabs,
-    Toolbar,
     Typography,
 } from '@mui/material';
 import hljs from 'highlight.js';
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
 
-import { ContentType } from '../../api/api';
-import { useGetProblemByIdQuery } from '../../api/slices/problemApi';
-import CodeBlock from '../../components/CodeBlock/CodeBlock';
+import { CommentViewModel, ProblemCommentViewModel } from '../../api/api';
+import { STORAGE_BASE_URL } from '../../api/constants';
+import { useAddProblemCommentMutation, useGetProblemCommentsQuery } from '../../api/slices/commentApi';
+import {
+    useGetProblemByIdQuery,
+    useGetVoteForProblemQuery,
+    useVoteForProblemMutation,
+} from '../../api/slices/problemApi';
 import CommentsSection from '../../components/CommentsSection/CommentsSection';
-import Solves from '../../components/Solves/Solves';
+import Content from '../../components/Content/Content';
+import SolvesSection from '../../components/SolvesSection/SolvesSection';
+import useAuthorization from '../../hooks/useAuthorization';
+
+const normalizeComments = (comments: ProblemCommentViewModel[]): CommentViewModel[] =>
+    comments?.map((c) => ({
+        ...c,
+        id: c.problemCommentId,
+        rootId: c.problemId,
+        replies: c.replies ? normalizeComments(c.replies) : undefined,
+    }));
 
 function a11yProps(index: number) {
     return {
@@ -67,42 +73,25 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const ProblemPage = () => {
+    const user = useAuthorization();
     const { id: idRaw } = useParams();
     const id = Number(idRaw);
-    const { data: problem } = useGetProblemByIdQuery(id, { skip: isNaN(id) });
-    // const problem: ProblemViewModel = {
-    //     problemId: 21,
-    //     problemName: 'A Palindromic Substrings',
-    //     problemContent: [
-    //         { contentType: ContentType.Subtitle, value: 'A problem' },
-    //         { contentType: ContentType.Emphasis, value: 'An Emphasis' },
-    //         {
-    //             contentType: ContentType.Paragraph,
-    //             value: 'Given a string s, return the number of palindromic substrings in it.\nA string is a palindrome when it reads the same backward as forward.\nA substring is a contiguous sequence of characters within the string.',
-    //         },
-    //         {
-    //             contentType: ContentType.Image,
-    //             imageName: 'fdsf',
-    //             value: 'Some caption',
-    //         },
-    //         { contentType: ContentType.Bar },
-    //         { contentType: ContentType.Subtitle, value: 'Examples' },
-    //         { contentType: ContentType.Code, value: 'javascript', code: 'console.log("Hello world!!!")' },
-    //     ],
-    //     createDate: new Date(Date.now()),
-    //     views: 78432,
-    //     solves: 2382,
-    //     upvotes: 3129,
-    //     downvotes: 23,
-    //     memoryLimitBytes: 2048,
-    //     timeLimitMs: 2000,
-    //     author: {
-    //         userId: '10',
-    //         fullName: 'Adriana Blanca',
-    //         email: 'dsfd',
-    //         userName: '@adriana',
-    //     },
-    // };
+    const { data: problem, isLoading: problemLoading } = useGetProblemByIdQuery(id, { skip: isNaN(id) });
+    const { data: comments } = useGetProblemCommentsQuery(id, { skip: isNaN(id) });
+    const { data: vote } = useGetVoteForProblemQuery(id, { skip: isNaN(id) });
+    const [addProblemComment] = useAddProblemCommentMutation();
+    const [voteForLesson] = useVoteForProblemMutation();
+    const navigate = useNavigate();
+
+    if (!idRaw || (!problemLoading && !problem)) {
+        navigate('/');
+    }
+
+    const normComments = comments ? normalizeComments(comments) : undefined;
+
+    const handleReply = (message: string, parentComment: number | undefined = undefined) => {
+        addProblemComment({ rootId: id, parentCommentId: parentComment, content: message });
+    };
 
     useEffect(() => hljs.highlightAll());
 
@@ -122,7 +111,17 @@ const ProblemPage = () => {
                         </Typography>
                         <Stack direction={'row'} alignItems={'center'} gap={0.5} ml={2}>
                             <Chip
-                                avatar={<Avatar alt='Natacha' src={`https://loremflickr.com/240/240/man`} />}
+                                avatar={
+                                    <Avatar
+                                        alt={problem?.author?.fullName}
+                                        src={
+                                            problem?.author?.iconName
+                                                ? STORAGE_BASE_URL + problem?.author.iconName
+                                                : 'https://ui-avatars.com/api/?rounded=true&name=' +
+                                                      problem?.author?.fullName ?? problem?.author?.userName
+                                        }
+                                    />
+                                }
                                 label={problem?.author?.fullName}
                                 variant='outlined'
                             />
@@ -132,69 +131,38 @@ const ProblemPage = () => {
                         </Stack>
                     </Stack>
                     <Stack direction={'row'} gap={2}>
-                        <Stack gap={1} alignItems={'center'}>
-                            <ThumbUpIcon fontSize='large' color='primary' />
+                        <Stack alignItems={'center'}>
+                            <IconButton
+                                onClick={() => voteForLesson({ problemId: id, isUpvote: true })}
+                                disabled={!user || vote === true}
+                            >
+                                <ThumbUpIcon fontSize='large' color={vote === true ? 'primary' : undefined} />
+                            </IconButton>
                             <Typography variant='body1'>{problem?.upvotes ?? 0}</Typography>
                         </Stack>
-                        <Stack gap={1} alignItems={'center'}>
-                            <ThumbDownIcon fontSize='large' color='primary' />
+                        <Stack alignItems={'center'}>
+                            <IconButton
+                                onClick={() => voteForLesson({ problemId: id, isUpvote: false })}
+                                disabled={!user || vote === false}
+                            >
+                                <ThumbDownIcon fontSize='large' color={vote === false ? 'primary' : undefined} />
+                            </IconButton>
                             <Typography variant='body1'>{problem?.downvotes ?? 0}</Typography>
                         </Stack>
                     </Stack>
                 </Stack>
                 <Container maxWidth='md'>
-                    <Stack alignItems={'center'} my={4} gap={3}>
-                        {problem?.problemContent?.map((content, i) => (
-                            <>
-                                {content.contentType === ContentType.Subtitle && (
-                                    <Typography variant='h5' component={'div'} alignSelf='stretch' key={i}>
-                                        {content.value}
-                                    </Typography>
-                                )}
-                                {content.contentType === ContentType.Emphasis && (
-                                    <Paper elevation={2} sx={{ mx: 2, alignSelf: 'stretch' }} key={i}>
-                                        <Typography
-                                            variant='body1'
-                                            component={'div'}
-                                            sx={{ fontStyle: 'italic', mx: 4, my: 2 }}
-                                        >
-                                            {content.value}
-                                        </Typography>
-                                    </Paper>
-                                )}
-                                {content.contentType === ContentType.Paragraph && (
-                                    <Typography
-                                        key={i}
-                                        variant='body1'
-                                        component={'div'}
-                                        sx={{ textIndent: 24, textAlign: 'justify' }}
-                                    >
-                                        {content.value}
-                                    </Typography>
-                                )}
-                                {content.contentType === ContentType.Image && (
-                                    <Card key={i}>
-                                        <CardMedia
-                                            image={`https://loremflickr.com/480/360/code`}
-                                            title='fsd'
-                                            sx={{ height: '24em', width: '36em' }}
-                                        />
-                                        <CardContent>{content.value}</CardContent>
-                                    </Card>
-                                )}
-                                {content.contentType === ContentType.Bar && (
-                                    <Divider key={i} sx={{ alignSelf: 'stretch' }} />
-                                )}
-                                {content.contentType === ContentType.Code && (
-                                    <CodeBlock key={i} code={content.code ?? ''} language={content.value} />
-                                )}
-                            </>
-                        ))}
-                        <MUIButton size='large' variant='contained' sx={{ width: 200 }}>
-                            Solve
-                        </MUIButton>
-                    </Stack>
+                    <Content content={problem?.problemContent} />
                 </Container>
+                <MUIButton
+                    size='large'
+                    variant='contained'
+                    sx={{ width: 200, alignSelf: 'center' }}
+                    component={NavLink}
+                    to='solve'
+                >
+                    Solve
+                </MUIButton>
             </Stack>
             <Container maxWidth='md'>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -204,48 +172,10 @@ const ProblemPage = () => {
                     </Tabs>
                 </Box>
                 <TabPanel value={value} index={0}>
-                    <Stack gap={1}>
-                        <Toolbar component={Stack} direction={'row'}>
-                            <FormControl sx={{ m: 1, minWidth: 120 }}>
-                                <InputLabel id='demo-simple-select-helper-label'>Sort by</InputLabel>
-                                <Select
-                                    labelId='demo-simple-select-helper-label'
-                                    id='demo-simple-select-helper'
-                                    value={1}
-                                    label='Sort by'
-                                    size='small'
-                                >
-                                    <MenuItem value=''>
-                                        <em>None</em>
-                                    </MenuItem>
-                                    <MenuItem value={1}>Popularity</MenuItem>
-                                    <MenuItem value={20}>Twenty</MenuItem>
-                                    <MenuItem value={30}>Thirty</MenuItem>
-                                </Select>
-                            </FormControl>
-                            <FormControl sx={{ m: 1, minWidth: 120 }}>
-                                <InputLabel id='demo-simple-select-helper-label'>Language</InputLabel>
-                                <Select
-                                    labelId='demo-simple-select-helper-label'
-                                    id='demo-simple-select-helper'
-                                    value={1}
-                                    label='Language'
-                                    size='small'
-                                >
-                                    <MenuItem value=''>
-                                        <em>Any</em>
-                                    </MenuItem>
-                                    <MenuItem value={1}>Any</MenuItem>
-                                    <MenuItem value={20}>Twenty</MenuItem>
-                                    <MenuItem value={30}>Thirty</MenuItem>
-                                </Select>
-                            </FormControl>
-                        </Toolbar>
-                        <Solves />
-                    </Stack>
+                    <SolvesSection />
                 </TabPanel>
                 <TabPanel value={value} index={1}>
-                    <CommentsSection comments={[]} noTitle />
+                    <CommentsSection comments={normComments} noTitle onReply={handleReply} />
                 </TabPanel>
             </Container>
         </Container>

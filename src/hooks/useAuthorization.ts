@@ -1,11 +1,13 @@
-import { useEffect } from 'react';
 import { getAccessToken } from 'axios-jwt';
 import jwtDecode from 'jwt-decode';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+
 import { useGetUserByIdQuery } from '../api/slices/userApi';
 
 const useAuthorization = (role?: string) => {
     const navigate = useNavigate();
+    const location = useLocation();
 
     const token = getAccessToken();
     const data = (token ? jwtDecode(token) : {}) as { Id: string; Role: string };
@@ -13,7 +15,7 @@ const useAuthorization = (role?: string) => {
 
     useEffect(() => {
         if (role && !isFetching && (isError || user?.role !== role)) {
-            navigate('/?login=true');
+            navigate('/?login=true&return='+location.pathname);
         }
     });
 

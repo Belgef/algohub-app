@@ -32,10 +32,10 @@ const LessonPage = () => {
     const { data: vote } = useGetVoteForLessonQuery(id, { skip: isNaN(id) });
     const [addLessonComment] = useAddLessonCommentMutation();
     const [voteForLesson] = useVoteForLessonMutation();
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
-    if(!idRaw || (!lessonLoading && !lesson)){
-        navigate("/")
+    if (!idRaw || (!lessonLoading && !lesson)) {
+        navigate('/');
     }
 
     const normComments = comments ? normalizeComments(comments) : undefined;
@@ -44,7 +44,7 @@ const LessonPage = () => {
         addLessonComment({ rootId: id, parentCommentId: parentComment, content: message });
     };
 
-    useEffect(() => hljs.highlightAll());
+    useEffect(() => hljs.highlightAll(), []);
 
     return (
         <Container maxWidth='lg'>
@@ -96,7 +96,9 @@ const LessonPage = () => {
                         </Stack>
                     </Stack>
                 </Stack>
-                <Content content={lesson?.lessonContent} />
+                <Container maxWidth='md'>
+                    <Content content={lesson?.lessonContent} />
+                </Container>
             </Stack>
             <Container maxWidth='md'>
                 <CommentsSection comments={normComments} onReply={handleReply} />

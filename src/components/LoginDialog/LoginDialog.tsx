@@ -1,8 +1,9 @@
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+
 import { UserLoginViewModel } from '../../api/api';
-import { useSearchParams } from 'react-router-dom';
 
 export type LoginDialogProps = {
     enabled: boolean;
@@ -12,6 +13,7 @@ export type LoginDialogProps = {
 
 const LoginDialog = (props: LoginDialogProps) => {
     const [params, setParams] = useSearchParams();
+    const navigate = useNavigate();
 
     const { handleSubmit, control } = useForm<UserLoginViewModel>({
         defaultValues: { userName: '', password: '' },
@@ -30,7 +32,11 @@ const LoginDialog = (props: LoginDialogProps) => {
 
     const onSubmit = async (user: UserLoginViewModel) => {
         if (await props.onSubmit(user)) {
-            handleClose();
+            if (params.has('return')) {
+                navigate(params.get('return')!);
+            } else {
+                handleClose();
+            }
         }
     };
 
