@@ -22,6 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import { ContentCreateElement, ContentElement, ContentType } from '../../api/api';
 import { storeClient } from '../../api/clients';
 import { useAddLessonMutation } from '../../api/slices/lessonApi';
+import ContentCodeEditor from '../../components/ContentCodeEditor/ContentCodeEditor';
 import StyledDropzone from '../../components/Dropzone/Dropzone';
 import useAuthorization from '../../hooks/useAuthorization';
 
@@ -34,7 +35,12 @@ export interface LessonCreate {
 const LessonAddPage = () => {
     useAuthorization('User');
 
-    const { control, handleSubmit } = useForm<LessonCreate>();
+    const { control, handleSubmit } = useForm<LessonCreate>({
+        defaultValues: {
+            lessonContent: [{ contentType: ContentType.Paragraph }],
+        },
+    });
+
     const contentFieldMethods = useFieldArray({
         control,
         name: 'lessonContent',
@@ -44,7 +50,7 @@ const LessonAddPage = () => {
                 message: 'The content is required',
             },
             maxLength: {
-                value: 30,
+                value: 20,
                 message: 'Max number of content elements exceeded',
             },
         },
@@ -79,8 +85,8 @@ const LessonAddPage = () => {
     };
 
     return (
-        <Container maxWidth='lg'>
-            <Typography gutterBottom mt='1em' variant='h4' component='h4'>
+        <Container maxWidth='lg' sx={{ pt: 2 }}>
+            <Typography gutterBottom ml={1} variant='h4' component='h4'>
                 Create new lesson
             </Typography>
             <Stack gap={2} component='form' onSubmit={handleSubmit(onSubmit, (err) => console.log(err))}>
@@ -200,6 +206,16 @@ const LessonAddPage = () => {
                                     />
                                 )}
                                 {field.contentType === ContentType.Bar && <Divider />}
+                                {field.contentType === ContentType.Code && (
+                                    <Controller
+                                        control={control}
+                                        name={`lessonContent.${index}`}
+                                        render={(fldProps) => <ContentCodeEditor {...fldProps.field} />}
+                                        rules={{
+                                            required: { value: true, message: 'This field is required' },
+                                        }}
+                                    />
+                                )}
                             </div>
                         ))}
                         <Controller
@@ -220,7 +236,12 @@ const LessonAddPage = () => {
                         ).map((key) => (
                             <Button
                                 key={key}
-                                onClick={() => contentFieldMethods.append({ contentType: ContentType[key] })}
+                                onClick={() =>
+                                    contentFieldMethods.append({
+                                        contentType: ContentType[key],
+                                        value: ContentType[key] === ContentType.Code ? 'python' : undefined,
+                                    })
+                                }
                                 sx={{ my: 1, display: 'block' }}
                             >
                                 New {key}

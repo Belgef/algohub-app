@@ -1,15 +1,8 @@
-import React from 'react';
+import AddIcon from '@mui/icons-material/AddCircle';
+import SearchIcon from '@mui/icons-material/Search';
 import {
-    Avatar,
-    Button,
-    Card,
-    CardActions,
-    CardContent,
-    CardMedia,
-    Chip,
     Container,
     FormControl,
-    FormHelperText,
     Grid,
     IconButton,
     InputBase,
@@ -21,14 +14,50 @@ import {
     Toolbar,
     Typography,
 } from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
+import { NavLink, useSearchParams } from 'react-router-dom';
+
 import { useGetProblemsQuery } from '../../api/slices/problemApi';
-import { STORAGE_BASE_URL } from '../../api/constants';
-import { NavLink } from 'react-router-dom';
-import AddIcon from '@mui/icons-material/AddCircle';
-import SearchIcon from '@mui/icons-material/Search';
+import ProblemLessonCard from '../../components/ProblemLessonCard/ProblemLessonCard';
+
+type Sort = 'popularity' | 'newest' | 'oldest' | 'rating';
 
 const ProblemsPage = () => {
-    const problems = useGetProblemsQuery();
+    const { data: problems } = useGetProblemsQuery();
+    const [params, setParams] = useSearchParams();
+    const [searchText, setSearchTest] = useState(params.get('search') ?? '');
+
+    const set = useMemo(() => {
+        const search = params.get('search')?.toLowerCase();
+        const sort = (params.get('sort') ?? 'popularity') as Sort;
+        const author = search?.startsWith('author:') ? search.replace(/author:\s*/, '') : undefined;
+        const tag = search?.startsWith('tag:') ? search.replace(/tag:\s*/, '') : undefined;
+        return [...(problems ?? [])]
+            .filter(
+                (p) =>
+                    !search ||
+                    (author &&
+                        (p.author?.fullName ?? p.author?.userName ?? 'deleted').toLowerCase().includes(author)) /* ||
+                    (tag && (p.author?.fullName ?? p.author?.userName ?? 'deleted').toLowerCase().includes(author))*/ ||
+                    (!author && !tag && p.problemName.toLowerCase().includes(search))
+            )
+            .sort((a, b) => {
+                if (sort === 'rating') {
+                    return (
+                        (b.upvotes ?? 0) / ((b.upvotes ?? 0) + (b.downvotes ?? 0) + 1) -
+                        (a.upvotes ?? 0) / ((a.upvotes ?? 0) + (a.downvotes ?? 0) + 1)
+                    );
+                } else if (sort === 'newest') {
+                    return a.createDate! < b.createDate! ? 1 : -1;
+                } else if (sort === 'oldest') {
+                    return a.createDate! > b.createDate! ? 1 : -1;
+                } else {
+                    return (b.views ?? 0) - (a.views ?? 0);
+                }
+            });
+    }, [params, problems]);
+
+    useEffect(() => setSearchTest(params.get('search') ?? ''), [params]);
 
     return (
         <Container maxWidth='lg'>
@@ -41,78 +70,61 @@ const ProblemsPage = () => {
                 mb={'0.5em'}
             >
                 <Typography variant='h4' component='h4'>
-                    Problems{' '}
+                    Problems
                     <IconButton size='small' component={NavLink} to='add'>
                         <AddIcon sx={{ fontSize: 24 }} />
                     </IconButton>
                 </Typography>
-                <Paper component='form' sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 400 }}>
+                <Paper
+                    component='form'
+                    sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 400 }}
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        setSearchTest(searchText.trim());
+                        if (searchText.trim() === params.get('search')) {
+                            return;
+                        }
+                        if (searchText.trim() !== '') {
+                            params.set('search', searchText.trim());
+                        } else {
+                            params.delete('search');
+                        }
+                        setParams(params);
+                    }}
+                >
                     <InputBase
                         sx={{ ml: 1, flex: 1 }}
                         placeholder='Search problems'
                         inputProps={{ 'aria-label': 'search google maps' }}
+                        value={searchText}
+                        onChange={(e) => setSearchTest(e.target.value)}
                     />
-                    <IconButton type='button' sx={{ p: '10px' }} aria-label='search'>
+                    <IconButton sx={{ p: '10px' }} aria-label='search' type='submit'>
                         <SearchIcon />
                     </IconButton>
                 </Paper>
                 <FormControl sx={{ m: 1, minWidth: 120 }}>
-                    <InputLabel id='demo-simple-select-helper-label'>Sort by</InputLabel>
+                    <InputLabel>Sort by</InputLabel>
                     <Select
-                        labelId='demo-simple-select-helper-label'
-                        id='demo-simple-select-helper'
-                        value={1}
+                        value={params.get('sort') ?? 'popularity'}
+                        onChange={(e) => {
+                            params.set('sort', e.target.value);
+                            setParams(params);
+                        }}
                         label='Sort by'
+                        size='small'
                     >
-                        <MenuItem value=''>
-                            <em>None</em>
-                        </MenuItem>
-                        <MenuItem value={1}>Popularity</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
+                        <MenuItem value={'popularity'}>Popularity</MenuItem>
+                        <MenuItem value={'rating'}>Rating</MenuItem>
+                        <MenuItem value={'newest'}>Newest</MenuItem>
+                        <MenuItem value={'oldest'}>Oldest</MenuItem>
                     </Select>
                 </FormControl>
             </Toolbar>
             <Grid container spacing={2} columns={4} justifyContent='center'>
-                {Array.from(new Array(48).keys()).map((p, i) => (
-                    <Grid item flexGrow={1}>
-                        <Card sx={{ maxWidth: 345 }}>
-                            <CardMedia
-                                sx={{ height: 140 }}
-                                image={`https://loremflickr.com/320/240/coding?random=${i}`}
-                                title={'Problem ' + (i + 1)}
-                            />
-                            <CardContent>
-                                <Typography gutterBottom variant='h5' component='div'>
-                                    {'Problem ' + (i + 1)}
-                                </Typography>
-                                <Stack direction={'row'} gap={0.5}>
-                                    <Chip size='small' label='tag1' color='primary' />
-                                    <Chip size='small' label='tag2' color='primary' />
-                                    <Chip size='small' label='tag3' color='primary' />
-                                </Stack>
-                                <Stack direction={'row'} gap={0.5}>
-                                    <Chip
-                                        avatar={
-                                            <Avatar
-                                                alt='Natacha'
-                                                src={`https://loremflickr.com/240/240/man?random=${i}`}
-                                            />
-                                        }
-                                        label='@author'
-                                        variant='outlined'
-                                        size='small'
-                                        sx={{ marginTop: '0.5em' }}
-                                    />
-                                </Stack>
-                            </CardContent>
-                            <CardActions>
-                                <Button size='small'>
-                                    {/* component={NavLink} to={p.problemId.toString()}> */}
-                                    Learn More
-                                </Button>
-                            </CardActions>
-                        </Card>
+                {set?.map((p, i) => (
+                    <Grid item flexGrow={0} flexShrink={0} key={i}>
+                        <ProblemLessonCard element={p} />
                     </Grid>
                 ))}
             </Grid>

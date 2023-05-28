@@ -19,14 +19,10 @@ import React from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import {
-    ContentCreateElement,
-    ContentElement,
-    ContentType,
-    TestViewModel,
-} from '../../api/api';
+import { ContentCreateElement, ContentElement, ContentType, TestViewModel } from '../../api/api';
 import { storeClient } from '../../api/clients';
 import { useAddProblemMutation } from '../../api/slices/problemApi';
+import ContentCodeEditor from '../../components/ContentCodeEditor/ContentCodeEditor';
 import StyledDropzone from '../../components/Dropzone/Dropzone';
 import useAuthorization from '../../hooks/useAuthorization';
 
@@ -42,7 +38,14 @@ export interface ProblemCreate {
 const ProblemAddPage = () => {
     useAuthorization('User');
 
-    const { control, handleSubmit } = useForm<ProblemCreate>();
+    const { control, handleSubmit } = useForm<ProblemCreate>({
+        defaultValues: {
+            timeLimitMs: 2000,
+            memoryLimitBytes: 4096,
+            problemContent: [{ contentType: ContentType.Paragraph }],
+            tests: [{}],
+        },
+    });
     const contentFieldMethods = useFieldArray({
         control,
         name: 'problemContent',
@@ -52,7 +55,7 @@ const ProblemAddPage = () => {
                 message: 'The content is required',
             },
             maxLength: {
-                value: 30,
+                value: 20,
                 message: 'Max number of content elements exceeded',
             },
         },
@@ -63,11 +66,11 @@ const ProblemAddPage = () => {
         rules: {
             required: {
                 value: true,
-                message: 'The content is required',
+                message: 'Tests are required',
             },
             maxLength: {
-                value: 30,
-                message: 'Max number of content elements exceeded',
+                value: 40,
+                message: 'Max number of tests exceeded',
             },
         },
     });
@@ -102,8 +105,8 @@ const ProblemAddPage = () => {
     };
 
     return (
-        <Container maxWidth='lg'>
-            <Typography gutterBottom mt='1em' variant='h4' component='h4'>
+        <Container maxWidth='lg' sx={{ pt: 2 }}>
+            <Typography gutterBottom variant='h4' ml={1} component='h4'>
                 Create new problem
             </Typography>
             <Stack gap={2} component='form' onSubmit={handleSubmit(onSubmit, (err) => console.log(err))}>
@@ -286,6 +289,16 @@ const ProblemAddPage = () => {
                                     />
                                 )}
                                 {field.contentType === ContentType.Bar && <Divider />}
+                                {field.contentType === ContentType.Code && (
+                                    <Controller
+                                        control={control}
+                                        name={`problemContent.${index}`}
+                                        render={(fldProps) => <ContentCodeEditor {...fldProps.field} />}
+                                        rules={{
+                                            required: { value: true, message: 'This field is required' },
+                                        }}
+                                    />
+                                )}
                             </div>
                         ))}
                         <Controller
@@ -306,7 +319,12 @@ const ProblemAddPage = () => {
                         ).map((key) => (
                             <Button
                                 key={key}
-                                onClick={() => contentFieldMethods.append({ contentType: ContentType[key] })}
+                                onClick={() =>
+                                    contentFieldMethods.append({
+                                        contentType: ContentType[key],
+                                        value: ContentType[key] === ContentType.Code ? 'python' : undefined,
+                                    })
+                                }
                                 sx={{ my: 1, display: 'block' }}
                             >
                                 New {key}
@@ -320,7 +338,7 @@ const ProblemAddPage = () => {
                     </CardContent>
                     <CardContent>
                         {testFieldMethods.fields.map((field, index) => (
-                            <div key={field.id}>
+                            <Stack key={field.id} direction={'row'} width={'100%'} gap={'1em'}>
                                 <Typography variant='h6'>
                                     <Toolbar disableGutters>
                                         {index + 1}.
@@ -334,49 +352,47 @@ const ProblemAddPage = () => {
                                         </IconButton>
                                     </Toolbar>
                                 </Typography>
-                                <Stack direction={'row'} width={'100%'} gap={'1em'}>
-                                    <Controller
-                                        control={control}
-                                        name={`tests.${index}.input`}
-                                        render={(fldProps) => (
-                                            <TextField
-                                                fullWidth
-                                                margin='dense'
-                                                label='Enter input'
-                                                type='text'
-                                                multiline
-                                                variant='outlined'
-                                                {...fldProps.field}
-                                                error={fldProps.fieldState.invalid}
-                                                helperText={fldProps.fieldState.error?.message}
-                                            />
-                                        )}
-                                        rules={{
-                                            required: { value: true, message: 'This field is required' },
-                                        }}
-                                    />
-                                    <Controller
-                                        control={control}
-                                        name={`tests.${index}.output`}
-                                        render={(fldProps) => (
-                                            <TextField
-                                                fullWidth
-                                                margin='dense'
-                                                label='Enter output'
-                                                type='text'
-                                                multiline
-                                                variant='outlined'
-                                                {...fldProps.field}
-                                                error={fldProps.fieldState.invalid}
-                                                helperText={fldProps.fieldState.error?.message}
-                                            />
-                                        )}
-                                        rules={{
-                                            required: { value: true, message: 'This field is required' },
-                                        }}
-                                    />
-                                </Stack>
-                            </div>
+                                <Controller
+                                    control={control}
+                                    name={`tests.${index}.input`}
+                                    render={(fldProps) => (
+                                        <TextField
+                                            fullWidth
+                                            margin='dense'
+                                            label='Enter input'
+                                            type='text'
+                                            multiline
+                                            variant='outlined'
+                                            {...fldProps.field}
+                                            error={fldProps.fieldState.invalid}
+                                            helperText={fldProps.fieldState.error?.message}
+                                        />
+                                    )}
+                                    rules={{
+                                        required: { value: true, message: 'This field is required' },
+                                    }}
+                                />
+                                <Controller
+                                    control={control}
+                                    name={`tests.${index}.output`}
+                                    render={(fldProps) => (
+                                        <TextField
+                                            fullWidth
+                                            margin='dense'
+                                            label='Enter output'
+                                            type='text'
+                                            multiline
+                                            variant='outlined'
+                                            {...fldProps.field}
+                                            error={fldProps.fieldState.invalid}
+                                            helperText={fldProps.fieldState.error?.message}
+                                        />
+                                    )}
+                                    rules={{
+                                        required: { value: true, message: 'This field is required' },
+                                    }}
+                                />
+                            </Stack>
                         ))}
                         <Controller
                             control={control}
