@@ -416,6 +416,8 @@ export class LessonClient {
             content_.append("LessonContent", lesson.lessonContent.toString());
         if (lesson.image !== null && lesson.image !== undefined)
             content_.append("Image", lesson.image);
+            if (lesson.tagsString !== null && lesson.tagsString !== undefined)
+                content_.append("TagsString", lesson.tagsString.toString());
 
         let options_: AxiosRequestConfig = {
             data: content_,
@@ -508,113 +510,6 @@ export class LessonClient {
         }
         return Promise.resolve<LessonViewModel>(null as any);
     }
-
-    addLessonVote(id: number | undefined, isUpvote: boolean | undefined , cancelToken?: CancelToken | undefined): Promise<number | null> {
-        let url_ = this.baseUrl + "/Lesson/Vote";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = new FormData();
-        if (id === null || id === undefined)
-            throw new Error("The parameter 'id' cannot be null.");
-        else
-            content_.append("Id", id.toString());
-        if (isUpvote === null || isUpvote === undefined)
-            throw new Error("The parameter 'isUpvote' cannot be null.");
-        else
-            content_.append("IsUpvote", isUpvote.toString());
-
-        let options_: AxiosRequestConfig = {
-            data: content_,
-            method: "POST",
-            url: url_,
-            headers: {
-                "Accept": "application/json"
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processAddLessonVote(_response);
-        });
-    }
-
-    protected processAddLessonVote(response: AxiosResponse): Promise<number | null> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200) {
-            const _responseText = response.data;
-            let result200: any = _responseText;
-            return Promise.resolve<number | null>(result200);
-
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<number | null>(null as any);
-    }
-
-    getLessonVote(lessonId: number | undefined , cancelToken?: CancelToken | undefined): Promise<boolean | null> {
-        let url_ = this.baseUrl + "/Lesson/Vote?";
-        if (lessonId === null)
-            throw new Error("The parameter 'lessonId' cannot be null.");
-        else if (lessonId !== undefined)
-            url_ += "lessonId=" + encodeURIComponent("" + lessonId) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: AxiosRequestConfig = {
-            method: "GET",
-            url: url_,
-            headers: {
-                "Accept": "application/json"
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processGetLessonVote(_response);
-        });
-    }
-
-    protected processGetLessonVote(response: AxiosResponse): Promise<boolean | null> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200) {
-            const _responseText = response.data;
-            let result200: any = _responseText;
-            return Promise.resolve<boolean | null>(result200);
-
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<boolean | null>(null as any);
-    }
 }
 
 export class ProblemClient {
@@ -697,6 +592,8 @@ export class ProblemClient {
             content_.append("MemoryLimitBytes", problem.memoryLimitBytes.toString());
         if (problem.testsString !== null && problem.testsString !== undefined)
             content_.append("TestsString", problem.testsString.toString());
+        if (problem.tagsString !== null && problem.tagsString !== undefined)
+            content_.append("TagsString", problem.tagsString.toString());
 
         let options_: AxiosRequestConfig = {
             data: content_,
@@ -788,113 +685,6 @@ export class ProblemClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
         return Promise.resolve<ProblemViewModel>(null as any);
-    }
-
-    addProblemVote(id: number | undefined, isUpvote: boolean | undefined , cancelToken?: CancelToken | undefined): Promise<number | null> {
-        let url_ = this.baseUrl + "/Problem/Vote";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = new FormData();
-        if (id === null || id === undefined)
-            throw new Error("The parameter 'id' cannot be null.");
-        else
-            content_.append("Id", id.toString());
-        if (isUpvote === null || isUpvote === undefined)
-            throw new Error("The parameter 'isUpvote' cannot be null.");
-        else
-            content_.append("IsUpvote", isUpvote.toString());
-
-        let options_: AxiosRequestConfig = {
-            data: content_,
-            method: "POST",
-            url: url_,
-            headers: {
-                "Accept": "application/json"
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processAddProblemVote(_response);
-        });
-    }
-
-    protected processAddProblemVote(response: AxiosResponse): Promise<number | null> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200) {
-            const _responseText = response.data;
-            let result200: any = _responseText;
-            return Promise.resolve<number | null>(result200);
-
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<number | null>(null as any);
-    }
-
-    getProblemVote(problemId: number | undefined , cancelToken?: CancelToken | undefined): Promise<boolean | null> {
-        let url_ = this.baseUrl + "/Problem/Vote?";
-        if (problemId === null)
-            throw new Error("The parameter 'problemId' cannot be null.");
-        else if (problemId !== undefined)
-            url_ += "problemId=" + encodeURIComponent("" + problemId) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: AxiosRequestConfig = {
-            method: "GET",
-            url: url_,
-            headers: {
-                "Accept": "application/json"
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processGetProblemVote(_response);
-        });
-    }
-
-    protected processGetProblemVote(response: AxiosResponse): Promise<boolean | null> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200) {
-            const _responseText = response.data;
-            let result200: any = _responseText;
-            return Promise.resolve<boolean | null>(result200);
-
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<boolean | null>(null as any);
     }
 }
 
@@ -1017,113 +807,6 @@ export class SolveClient {
         }
         return Promise.resolve<string[]>(null as any);
     }
-
-    addSolveVote(id: number | undefined, isUpvote: boolean | undefined , cancelToken?: CancelToken | undefined): Promise<number | null> {
-        let url_ = this.baseUrl + "/Solve/Vote";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = new FormData();
-        if (id === null || id === undefined)
-            throw new Error("The parameter 'id' cannot be null.");
-        else
-            content_.append("Id", id.toString());
-        if (isUpvote === null || isUpvote === undefined)
-            throw new Error("The parameter 'isUpvote' cannot be null.");
-        else
-            content_.append("IsUpvote", isUpvote.toString());
-
-        let options_: AxiosRequestConfig = {
-            data: content_,
-            method: "POST",
-            url: url_,
-            headers: {
-                "Accept": "application/json"
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processAddSolveVote(_response);
-        });
-    }
-
-    protected processAddSolveVote(response: AxiosResponse): Promise<number | null> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200) {
-            const _responseText = response.data;
-            let result200: any = _responseText;
-            return Promise.resolve<number | null>(result200);
-
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<number | null>(null as any);
-    }
-
-    getSolveVote(solveId: number | undefined , cancelToken?: CancelToken | undefined): Promise<boolean | null> {
-        let url_ = this.baseUrl + "/Solve/Vote?";
-        if (solveId === null)
-            throw new Error("The parameter 'solveId' cannot be null.");
-        else if (solveId !== undefined)
-            url_ += "solveId=" + encodeURIComponent("" + solveId) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: AxiosRequestConfig = {
-            method: "GET",
-            url: url_,
-            headers: {
-                "Accept": "application/json"
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processGetSolveVote(_response);
-        });
-    }
-
-    protected processGetSolveVote(response: AxiosResponse): Promise<boolean | null> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200) {
-            const _responseText = response.data;
-            let result200: any = _responseText;
-            return Promise.resolve<boolean | null>(result200);
-
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<boolean | null>(null as any);
-    }
 }
 
 export class StoreClient {
@@ -1188,6 +871,164 @@ export class StoreClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
         return Promise.resolve<string>(null as any);
+    }
+}
+
+export class TagClient {
+    private instance: AxiosInstance;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, instance?: AxiosInstance) {
+
+        this.instance = instance ? instance : axios.create();
+
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "https://localhost:7224";
+
+    }
+
+    getAllTags(  cancelToken?: CancelToken | undefined): Promise<string[]> {
+        let url_ = this.baseUrl + "/Tag";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetAllTags(_response);
+        });
+    }
+
+    protected processGetAllTags(response: AxiosResponse): Promise<string[]> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<string[]>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<string[]>(null as any);
+    }
+
+    getLessonTags(lessonId: number , cancelToken?: CancelToken | undefined): Promise<string[]> {
+        let url_ = this.baseUrl + "/Tag/Lesson/{lessonId}";
+        if (lessonId === undefined || lessonId === null)
+            throw new Error("The parameter 'lessonId' must be defined.");
+        url_ = url_.replace("{lessonId}", encodeURIComponent("" + lessonId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetLessonTags(_response);
+        });
+    }
+
+    protected processGetLessonTags(response: AxiosResponse): Promise<string[]> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<string[]>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<string[]>(null as any);
+    }
+
+    getProblemTags(problemId: number , cancelToken?: CancelToken | undefined): Promise<string[]> {
+        let url_ = this.baseUrl + "/Tag/Problem/{problemId}";
+        if (problemId === undefined || problemId === null)
+            throw new Error("The parameter 'problemId' must be defined.");
+        url_ = url_.replace("{problemId}", encodeURIComponent("" + problemId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetProblemTags(_response);
+        });
+    }
+
+    protected processGetProblemTags(response: AxiosResponse): Promise<string[]> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<string[]>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<string[]>(null as any);
     }
 }
 
@@ -1510,6 +1351,338 @@ export class UserClient {
     }
 }
 
+export class VoteClient {
+    private instance: AxiosInstance;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, instance?: AxiosInstance) {
+
+        this.instance = instance ? instance : axios.create();
+
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "https://localhost:7224";
+
+    }
+
+    addLessonVote(id: number | undefined, isUpvote: boolean | undefined , cancelToken?: CancelToken | undefined): Promise<number | null> {
+        let url_ = this.baseUrl + "/Vote/Lesson";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (id === null || id === undefined)
+            throw new Error("The parameter 'id' cannot be null.");
+        else
+            content_.append("Id", id.toString());
+        if (isUpvote === null || isUpvote === undefined)
+            throw new Error("The parameter 'isUpvote' cannot be null.");
+        else
+            content_.append("IsUpvote", isUpvote.toString());
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processAddLessonVote(_response);
+        });
+    }
+
+    protected processAddLessonVote(response: AxiosResponse): Promise<number | null> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<number | null>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<number | null>(null as any);
+    }
+
+    getLessonVote(lessonId: number , cancelToken?: CancelToken | undefined): Promise<boolean | null> {
+        let url_ = this.baseUrl + "/Vote/Lesson/{lessonId}";
+        if (lessonId === undefined || lessonId === null)
+            throw new Error("The parameter 'lessonId' must be defined.");
+        url_ = url_.replace("{lessonId}", encodeURIComponent("" + lessonId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetLessonVote(_response);
+        });
+    }
+
+    protected processGetLessonVote(response: AxiosResponse): Promise<boolean | null> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<boolean | null>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<boolean | null>(null as any);
+    }
+
+    addProblemVote(id: number | undefined, isUpvote: boolean | undefined , cancelToken?: CancelToken | undefined): Promise<number | null> {
+        let url_ = this.baseUrl + "/Vote/Problem";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (id === null || id === undefined)
+            throw new Error("The parameter 'id' cannot be null.");
+        else
+            content_.append("Id", id.toString());
+        if (isUpvote === null || isUpvote === undefined)
+            throw new Error("The parameter 'isUpvote' cannot be null.");
+        else
+            content_.append("IsUpvote", isUpvote.toString());
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processAddProblemVote(_response);
+        });
+    }
+
+    protected processAddProblemVote(response: AxiosResponse): Promise<number | null> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<number | null>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<number | null>(null as any);
+    }
+
+    getProblemVote(problemId: number , cancelToken?: CancelToken | undefined): Promise<boolean | null> {
+        let url_ = this.baseUrl + "/Vote/Problem/{problemId}";
+        if (problemId === undefined || problemId === null)
+            throw new Error("The parameter 'problemId' must be defined.");
+        url_ = url_.replace("{problemId}", encodeURIComponent("" + problemId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetProblemVote(_response);
+        });
+    }
+
+    protected processGetProblemVote(response: AxiosResponse): Promise<boolean | null> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<boolean | null>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<boolean | null>(null as any);
+    }
+
+    addSolveVote(id: number | undefined, isUpvote: boolean | undefined , cancelToken?: CancelToken | undefined): Promise<number | null> {
+        let url_ = this.baseUrl + "/Vote/Solve";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (id === null || id === undefined)
+            throw new Error("The parameter 'id' cannot be null.");
+        else
+            content_.append("Id", id.toString());
+        if (isUpvote === null || isUpvote === undefined)
+            throw new Error("The parameter 'isUpvote' cannot be null.");
+        else
+            content_.append("IsUpvote", isUpvote.toString());
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processAddSolveVote(_response);
+        });
+    }
+
+    protected processAddSolveVote(response: AxiosResponse): Promise<number | null> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<number | null>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<number | null>(null as any);
+    }
+
+    getSolveVote(solveId: number , cancelToken?: CancelToken | undefined): Promise<boolean | null> {
+        let url_ = this.baseUrl + "/Vote/Solve/{solveId}";
+        if (solveId === undefined || solveId === null)
+            throw new Error("The parameter 'solveId' must be defined.");
+        url_ = url_.replace("{solveId}", encodeURIComponent("" + solveId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetSolveVote(_response);
+        });
+    }
+
+    protected processGetSolveVote(response: AxiosResponse): Promise<boolean | null> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<boolean | null>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<boolean | null>(null as any);
+    }
+}
+
 export interface LessonCommentViewModel {
     lessonCommentId?: number | undefined;
     lessonId?: number | undefined;
@@ -1571,6 +1744,7 @@ export interface LessonViewModel {
     upvotes: number;
     downvotes: number;
     createDate: Date;
+    tags: string[] | undefined;
 }
 
 export interface ProblemViewModel {
@@ -1586,6 +1760,7 @@ export interface ProblemViewModel {
     timeLimitMs: number;
     memoryLimitBytes: number;
     createDate: Date;
+    tags: string[] | undefined;
 }
 
 export interface UserViewModel {
@@ -1676,12 +1851,14 @@ export interface ProblemCreateViewModel {
     timeLimitMs: number | undefined;
     memoryLimitBytes: number | undefined;
     testsString: string | null | undefined;
+    tagsString: string | null | undefined;
 }
 
 export interface LessonCreateViewModel {
     title: string | null | undefined;
     lessonContent: string | null | undefined;
     image: File | null | undefined;
+    tagsString: string | null | undefined;
 }
 
 export interface TestViewModel {

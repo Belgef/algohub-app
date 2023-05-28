@@ -21,6 +21,7 @@ const ProblemLessonCard = (props: ProblemLessonCardProps) => {
                       views: props.element.views,
                       createDate: props.element.createDate,
                       author: props.element.author,
+                      tags: props.element.tags,
                   }
                 : {
                       id: props.element.lessonId,
@@ -29,6 +30,7 @@ const ProblemLessonCard = (props: ProblemLessonCardProps) => {
                       views: props.element.views,
                       createDate: props.element.createDate,
                       author: props.element.author,
+                      tags: props.element.tags,
                   },
         [props.element]
     );
@@ -36,7 +38,7 @@ const ProblemLessonCard = (props: ProblemLessonCardProps) => {
         <Card
             sx={{ width: 273, flexShrink: 0, flexGrow: 0 }}
             component={NavLink}
-            to={('problemId' in props.element ? 'Problems/' : 'Lessons/') + p.id.toString()}
+            to={('problemId' in props.element ? '/Problems/' : '/Lessons/') + p.id.toString()}
         >
             <CardMedia
                 sx={{ height: 140 }}
@@ -48,27 +50,16 @@ const ProblemLessonCard = (props: ProblemLessonCardProps) => {
                     {p.name}
                 </Typography>
                 <Stack direction={'row'} gap={0.5}>
-                    <Chip
-                        size='small'
-                        label='tag1'
-                        color='primary'
-                        component={NavLink}
-                        to={('problemId' in props.element ? '/Problems' : '/Lessons') + '?search=tag%3Atag1'}
-                    />
-                    <Chip
-                        size='small'
-                        label='tag2'
-                        color='primary'
-                        component={NavLink}
-                        to={('problemId' in props.element ? '/Problems' : '/Lessons') + '?search=tag%3Atag2'}
-                    />
-                    <Chip
-                        size='small'
-                        label='tag3'
-                        color='primary'
-                        component={NavLink}
-                        to={('problemId' in props.element ? '/Problems' : '/Lessons') + '?search=tag%3Atag3'}
-                    />
+                    {p.tags?.slice(0, 3)?.map((t) => (
+                        <Chip
+                            size='small'
+                            label={t}
+                            color='primary'
+                            component={NavLink}
+                            to={('problemId' in props.element ? '/Problems' : '/Lessons') + '?search=tag%3A' + t}
+                        />
+                    ))}
+                    {(p.tags?.length ?? 0) > 3 && '...'}
                 </Stack>
                 <Stack direction={'row'} gap={2} flexWrap='wrap' alignItems='center' sx={{ marginTop: '0.5em' }}>
                     <Chip
@@ -98,10 +89,10 @@ const ProblemLessonCard = (props: ProblemLessonCardProps) => {
                     <Typography variant='body2' color='text.secondary'>
                         {p.views} views
                     </Typography>
-                    <Typography variant='body2' color='text.secondary'>
-                        {moment.utc(p.createDate).local().calendar().toLocaleString()}
-                    </Typography>
                 </Stack>
+                <Typography variant='body2' color='text.secondary' mt={1}>
+                    {moment.utc(p.createDate).local().calendar().toLocaleString()}
+                </Typography>
             </CardContent>
         </Card>
     );

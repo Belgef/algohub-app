@@ -1,8 +1,8 @@
-import { CardMedia, Paper, Stack, Typography } from '@mui/material';
+import { Card, CardContent, Divider, Paper, Stack, Typography } from '@mui/material';
 import React from 'react';
-import { Card, CardContent, Divider } from 'semantic-ui-react';
 
 import { ContentElement, ContentType } from '../../api/api';
+import { STORAGE_BASE_URL } from '../../api/constants';
 import CodeBlock from '../CodeBlock/CodeBlock';
 
 type ContentProps = {
@@ -15,7 +15,7 @@ const Content = (props: ContentProps) => {
             {props.content?.map((content, i) => (
                 <>
                     {content.contentType === ContentType.Subtitle && (
-                        <Typography variant='h5' component={'div'} key={i} className='prelined' sx={{ml:2}}>
+                        <Typography variant='h5' component={'div'} key={i} className='prelined' sx={{ ml: 2 }}>
                             {content.value}
                         </Typography>
                     )}
@@ -43,18 +43,12 @@ const Content = (props: ContentProps) => {
                         </Typography>
                     )}
                     {content.contentType === ContentType.Image && (
-                        <Card key={i} sx={{alignSelf: 'center'}}>
-                            <CardMedia
-                                image={`https://loremflickr.com/480/360/code`}
-                                title='fsd'
-                                sx={{ minHeight: '12em' }}
-                            />
+                        <Card key={i} sx={{ alignSelf: 'center', minWidth: '60%' }}>
+                            <img src={STORAGE_BASE_URL + content.imageName} style={{maxWidth:'100%', maxHeight:'50vh'}} alt='contentImage' />
                             <CardContent className='prelined'>{content.value}</CardContent>
                         </Card>
                     )}
-                    {content.contentType === ContentType.Bar && (
-                        <Divider key={i} sx={{ width: '100%' }} />
-                    )}
+                    {content.contentType === ContentType.Bar && <Divider key={i} sx={{ width: '100%' }} />}
                     {content.contentType === ContentType.Code && (
                         <CodeBlock key={i} code={content.code ?? ''} language={content.value} />
                     )}

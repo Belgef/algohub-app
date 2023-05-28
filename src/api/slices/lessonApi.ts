@@ -1,7 +1,7 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 
 import { LessonCreateViewModel, LessonViewModel } from '../api';
-import { lessonClient } from '../clients';
+import { lessonClient, voteClient } from '../clients';
 
 export const lessonApi = createApi({
     reducerPath: 'lessonApi',
@@ -21,11 +21,11 @@ export const lessonApi = createApi({
             invalidatesTags: ['Lesson', 'Lessons'],
         }),
         voteForLesson: builder.mutation<number | null, { lessonId: number; isUpvote: boolean }>({
-            queryFn: async (vote) => ({ data: await lessonClient.addLessonVote(vote.lessonId, vote.isUpvote) }),
+            queryFn: async (vote) => ({ data: await voteClient.addLessonVote(vote.lessonId, vote.isUpvote) }),
             invalidatesTags: ['Lesson', 'Lessons'],
         }),
         getVoteForLesson: builder.query<boolean | null, number>({
-            queryFn: async (lessonId) => ({ data: await lessonClient.getLessonVote(lessonId) }),
+            queryFn: async (lessonId) => ({ data: await voteClient.getLessonVote(lessonId) }),
             providesTags: ['Lesson'],
         }),
     }),

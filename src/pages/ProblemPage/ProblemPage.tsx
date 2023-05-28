@@ -104,6 +104,12 @@ const ProblemPage = () => {
     return (
         <Container maxWidth='lg'>
             <Stack>
+                <img
+                    src={STORAGE_BASE_URL + problem?.imageName}
+                    style={{ maxWidth: '100%', maxHeight: '50vh', alignSelf: 'center' }}
+                    alt='mainImage'
+                    onError={(event) => (event.currentTarget.style.display = 'none')}
+                />
                 <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'} mt='1em'>
                     <Stack>
                         <Typography gutterBottom variant='h4' component='div'>
@@ -113,21 +119,33 @@ const ProblemPage = () => {
                             <Chip
                                 avatar={
                                     <Avatar
-                                        alt={problem?.author?.fullName}
+                                        alt={problem?.author?.fullName ?? problem?.author?.userName ?? 'deleted'}
                                         src={
                                             problem?.author?.iconName
                                                 ? STORAGE_BASE_URL + problem?.author.iconName
                                                 : 'https://ui-avatars.com/api/?rounded=true&name=' +
-                                                      problem?.author?.fullName ?? problem?.author?.userName
+                                                  (problem?.author?.fullName ?? problem?.author?.userName ?? 'deleted')
                                         }
                                     />
                                 }
-                                label={problem?.author?.fullName}
+                                label={problem?.author?.fullName ?? problem?.author?.userName ?? 'deleted'}
                                 variant='outlined'
+                                component={NavLink}
+                                to={
+                                    '/Lessons?search=author%3A' + problem?.author?.fullName ??
+                                    problem?.author?.userName ??
+                                    'deleted'
+                                }
                             />
-                            <Chip size='small' label='tag1' color='primary' />
-                            <Chip size='small' label='tag2' color='primary' />
-                            <Chip size='small' label='tag3' color='primary' />
+                            {problem?.tags?.map((t) => (
+                                <Chip
+                                    size='small'
+                                    label={t}
+                                    color='primary'
+                                    component={NavLink}
+                                    to={'/Lessons?search=tag%3A' + t}
+                                />
+                            ))}
                         </Stack>
                     </Stack>
                     <Stack direction={'row'} gap={2}>

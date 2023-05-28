@@ -4,6 +4,7 @@ import commentApi from './slices/commentApi';
 import lessonApi from './slices/lessonApi';
 import problemApi from './slices/problemApi';
 import solveApi from './slices/solveApi';
+import tagApi from './slices/tagApi';
 import userApi from './slices/userApi';
 
 export const store = configureStore({
@@ -13,14 +14,16 @@ export const store = configureStore({
         [lessonApi.reducerPath]: lessonApi.reducer,
         [commentApi.reducerPath]: commentApi.reducer,
         [solveApi.reducerPath]: solveApi.reducer,
+        [tagApi.reducerPath]: tagApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware()
-        .concat(userApi.middleware)
-        .concat(problemApi.middleware)
-        .concat(lessonApi.middleware)
-        .concat(commentApi.middleware)
-        .concat(solveApi.middleware),
+            .concat(userApi.middleware)
+            .concat(problemApi.middleware)
+            .concat(lessonApi.middleware)
+            .concat(commentApi.middleware)
+            .concat(solveApi.middleware)
+            .concat(tagApi.middleware),
 });
 
 export type AppDispatch = typeof store.dispatch;

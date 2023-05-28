@@ -3,10 +3,12 @@ import MoveDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import MoveUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import {
     Alert,
+    Autocomplete,
     Button,
     Card,
     CardActions,
     CardContent,
+    Chip,
     Container,
     Divider,
     IconButton,
@@ -22,14 +24,16 @@ import { useNavigate } from 'react-router-dom';
 import { ContentCreateElement, ContentElement, ContentType } from '../../api/api';
 import { storeClient } from '../../api/clients';
 import { useAddLessonMutation } from '../../api/slices/lessonApi';
+import { useGetTagsQuery } from '../../api/slices/tagApi';
 import ContentCodeEditor from '../../components/ContentCodeEditor/ContentCodeEditor';
 import StyledDropzone from '../../components/Dropzone/Dropzone';
 import useAuthorization from '../../hooks/useAuthorization';
 
 export interface LessonCreate {
-    title: string | null | undefined;
+    title: string;
     lessonContent: ContentCreateElement[];
     image: File | null | undefined;
+    tags: string[];
 }
 
 const LessonAddPage = () => {
@@ -38,6 +42,7 @@ const LessonAddPage = () => {
     const { control, handleSubmit } = useForm<LessonCreate>({
         defaultValues: {
             lessonContent: [{ contentType: ContentType.Paragraph }],
+            tags: [],
         },
     });
 
@@ -59,6 +64,7 @@ const LessonAddPage = () => {
     const navigate = useNavigate();
 
     const [addLesson] = useAddLessonMutation();
+    const { data: tags } = useGetTagsQuery();
 
     const onSubmit = async (lesson: LessonCreate) => {
         console.log(lesson);
@@ -77,6 +83,7 @@ const LessonAddPage = () => {
         const result = await addLesson({
             ...lesson,
             lessonContent: JSON.stringify(newContent),
+            tagsString: JSON.stringify(lesson.tags),
         });
 
         if ('data' in result) {
@@ -125,6 +132,52 @@ const LessonAddPage = () => {
                         pattern: {
                             value: /^[\S ]+$/,
                             message: 'Lesson title must not contain tabs or enters',
+                        },
+                    }}
+                />
+                <Controller
+                    control={control}
+                    name='tags'
+                    render={({ field, fieldState }) => {
+                        console.log(field.value);
+                        return (
+                            <Autocomplete
+                                multiple
+                                options={tags ?? []}
+                                {...field}
+                                onChange={(_e, v) => field.onChange(v)}
+                                freeSolo
+                                renderTags={(value: readonly string[], getTagProps) =>
+                                    value.map((option: string, index: number) => (
+                                        <Chip variant='outlined' label={option} {...getTagProps({ index })} />
+                                    ))
+                                }
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label='Tags'
+                                        fullWidth
+                                        variant='outlined'
+                                        placeholder='eg. graph-theory'
+                                        error={fieldState.invalid}
+                                        helperText={fieldState.error?.message}
+                                    />
+                                )}
+                            />
+                        );
+                    }}
+                    rules={{
+                        validate: {
+                            unique: (value) => (new Set(value).size === value.length ? true : 'Tags must be unique'),
+                            lowercase: (value) =>
+                                value.every((t) => t.match(/[a-z-]+/))
+                                    ? true
+                                    : 'Tags must contain lowercase letters a to z and dash symbol "-"',
+                            size: (value) =>
+                                value.every((t) => t.length >= 1 && t.length <= 50)
+                                    ? true
+                                    : 'Tag must be from 1 to 50 characters long',
+                            length: (value) => (value.length <= 20 ? true : 'Cannot add more than 20 tags'),
                         },
                     }}
                 />

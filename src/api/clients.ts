@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { IAuthTokens, TokenRefreshRequest, applyAuthTokenInterceptor, getAccessToken } from 'axios-jwt';
 
-import { CommentClient, LessonClient, ProblemClient, SolveClient, StoreClient, UserClient } from './api';
+import { CommentClient, LessonClient, ProblemClient, SolveClient, StoreClient, TagClient, UserClient, VoteClient } from './api';
 
 export const axiosInstance = axios.create();
 
@@ -35,3 +35,5 @@ export const lessonClient = new LessonClient(undefined, axiosInstance);
 export const storeClient = new StoreClient(undefined, axiosInstance);
 export const commentClient = new CommentClient(undefined, axiosInstance);
 export const solveClient = new SolveClient(undefined, axiosInstance);
+export const voteClient = new VoteClient(undefined, axiosInstance);
+export const tagClient = new TagClient(undefined, axiosInstance);

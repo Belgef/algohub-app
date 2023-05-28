@@ -3,7 +3,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import {
     Container,
     FormControl,
-    Grid,
     IconButton,
     InputBase,
     InputLabel,
@@ -37,8 +36,8 @@ const ProblemsPage = () => {
                 (p) =>
                     !search ||
                     (author &&
-                        (p.author?.fullName ?? p.author?.userName ?? 'deleted').toLowerCase().includes(author)) /* ||
-                    (tag && (p.author?.fullName ?? p.author?.userName ?? 'deleted').toLowerCase().includes(author))*/ ||
+                        (p.author?.fullName ?? p.author?.userName ?? 'deleted').toLowerCase().includes(author)) ||
+                    (tag && p.tags?.some((t) => t.toLowerCase().includes(tag))) ||
                     (!author && !tag && p.problemName.toLowerCase().includes(search))
             )
             .sort((a, b) => {
@@ -121,13 +120,11 @@ const ProblemsPage = () => {
                     </Select>
                 </FormControl>
             </Toolbar>
-            <Grid container spacing={2} columns={4} justifyContent='center'>
+            <Stack justifyContent='center' flexWrap='wrap' direction='row' gap={2} width='100%'>
                 {set?.map((p, i) => (
-                    <Grid item flexGrow={0} flexShrink={0} key={i}>
-                        <ProblemLessonCard element={p} />
-                    </Grid>
+                    <ProblemLessonCard element={p} />
                 ))}
-            </Grid>
+            </Stack>
         </Container>
     );
 };

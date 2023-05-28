@@ -3,10 +3,12 @@ import MoveDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import MoveUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import {
     Alert,
+    Autocomplete,
     Button,
     Card,
     CardActions,
     CardContent,
+    Chip,
     Container,
     Divider,
     IconButton,
@@ -22,6 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import { ContentCreateElement, ContentElement, ContentType, TestViewModel } from '../../api/api';
 import { storeClient } from '../../api/clients';
 import { useAddProblemMutation } from '../../api/slices/problemApi';
+import { useGetTagsQuery } from '../../api/slices/tagApi';
 import ContentCodeEditor from '../../components/ContentCodeEditor/ContentCodeEditor';
 import StyledDropzone from '../../components/Dropzone/Dropzone';
 import useAuthorization from '../../hooks/useAuthorization';
@@ -33,6 +36,7 @@ export interface ProblemCreate {
     timeLimitMs: number | undefined;
     memoryLimitBytes: number | undefined;
     tests: TestViewModel[] | undefined;
+    tags: string[];
 }
 
 const ProblemAddPage = () => {
@@ -44,6 +48,7 @@ const ProblemAddPage = () => {
             memoryLimitBytes: 4096,
             problemContent: [{ contentType: ContentType.Paragraph }],
             tests: [{}],
+            tags: [],
         },
     });
     const contentFieldMethods = useFieldArray({
@@ -69,7 +74,7 @@ const ProblemAddPage = () => {
                 message: 'Tests are required',
             },
             maxLength: {
-                value: 40,
+                value: 50,
                 message: 'Max number of tests exceeded',
             },
         },
@@ -78,6 +83,7 @@ const ProblemAddPage = () => {
     const navigate = useNavigate();
 
     const [addProblem] = useAddProblemMutation();
+    const { data: tags } = useGetTagsQuery();
 
     const onSubmit = async (problem: ProblemCreate) => {
         console.log(problem);
@@ -97,6 +103,7 @@ const ProblemAddPage = () => {
             ...problem,
             problemContent: JSON.stringify(newContent),
             testsString: JSON.stringify(problem.tests),
+            tagsString: JSON.stringify(problem.tags),
         });
 
         if ('data' in result) {
@@ -211,6 +218,52 @@ const ProblemAddPage = () => {
                         )}
                     />
                 </Stack>
+                <Controller
+                    control={control}
+                    name='tags'
+                    render={({ field, fieldState }) => {
+                        console.log(field.value);
+                        return (
+                            <Autocomplete
+                                multiple
+                                options={tags ?? []}
+                                {...field}
+                                onChange={(_e, v) => field.onChange(v)}
+                                freeSolo
+                                renderTags={(value: readonly string[], getTagProps) =>
+                                    value.map((option: string, index: number) => (
+                                        <Chip variant='outlined' label={option} {...getTagProps({ index })} />
+                                    ))
+                                }
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label='Tags'
+                                        fullWidth
+                                        variant='outlined'
+                                        placeholder='eg. graph-theory'
+                                        error={fieldState.invalid}
+                                        helperText={fieldState.error?.message}
+                                    />
+                                )}
+                            />
+                        );
+                    }}
+                    rules={{
+                        validate: {
+                            unique: (value) => (new Set(value).size === value.length ? true : 'Tags must be unique'),
+                            lowercase: (value) =>
+                                value.every((t) => t.match(/[a-z-]+/))
+                                    ? true
+                                    : 'Tags must contain lowercase letters a to z and dash symbol "-"',
+                            size: (value) =>
+                                value.every((t) => t.length >= 1 && t.length <= 50)
+                                    ? true
+                                    : 'Tag must be from 1 to 50 characters long',
+                            length: (value) => (value.length <= 20 ? true : 'Cannot add more than 20 tags'),
+                        },
+                    }}
+                />
                 <Card elevation={1}>
                     <CardContent>
                         <Typography variant='h5'>Content</Typography>

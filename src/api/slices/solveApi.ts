@@ -1,7 +1,7 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 
 import { SolveCreateViewModel, SolveViewModel } from '../api';
-import { solveClient } from '../clients';
+import { solveClient, voteClient } from '../clients';
 
 export const solveApi = createApi({
     reducerPath: 'solveApi',
@@ -17,11 +17,11 @@ export const solveApi = createApi({
             invalidatesTags: ['Solves'],
         }),
         voteForSolve: builder.mutation<number | null, { solveId: number; isUpvote: boolean }>({
-            queryFn: async (vote) => ({ data: await solveClient.addSolveVote(vote.solveId, vote.isUpvote) }),
+            queryFn: async (vote) => ({ data: await voteClient.addSolveVote(vote.solveId, vote.isUpvote) }),
             invalidatesTags: ['Solves'],
         }),
         getVoteForSolve: builder.query<boolean | null, number>({
-            queryFn: async (solveId) => ({ data: await solveClient.getSolveVote(solveId) }),
+            queryFn: async (solveId) => ({ data: await voteClient.getSolveVote(solveId) }),
             providesTags: ['Solves'],
         }),
     }),

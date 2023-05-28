@@ -5,7 +5,7 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import { Avatar, Chip, Container, IconButton, Stack, Typography } from '@mui/material';
 import hljs from 'highlight.js';
 import React, { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
 
 import { CommentViewModel, LessonCommentViewModel } from '../../api/api';
 import { STORAGE_BASE_URL } from '../../api/constants';
@@ -49,6 +49,12 @@ const LessonPage = () => {
     return (
         <Container maxWidth='lg'>
             <Stack>
+                <img
+                    src={STORAGE_BASE_URL + lesson?.imageName}
+                    style={{ maxWidth: '100%', maxHeight: '50vh', alignSelf: 'center' }}
+                    alt='mainImage'
+                    onError={(event) => (event.currentTarget.style.display = 'none')}
+                />
                 <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'} mt='1em'>
                     <Stack>
                         <Typography gutterBottom variant='h4' component='div' mt={'1em'}>
@@ -58,21 +64,33 @@ const LessonPage = () => {
                             <Chip
                                 avatar={
                                     <Avatar
-                                        alt={lesson?.author?.fullName}
+                                        alt={lesson?.author?.fullName ?? lesson?.author?.userName ?? 'deleted'}
                                         src={
                                             lesson?.author?.iconName
                                                 ? STORAGE_BASE_URL + lesson?.author.iconName
                                                 : 'https://ui-avatars.com/api/?rounded=true&name=' +
-                                                      lesson?.author?.fullName ?? lesson?.author?.userName
+                                                  (lesson?.author?.fullName ?? lesson?.author?.userName ?? 'deleted')
                                         }
                                     />
                                 }
-                                label={lesson?.author?.fullName}
+                                label={lesson?.author?.fullName ?? lesson?.author?.userName ?? 'deleted'}
                                 variant='outlined'
+                                component={NavLink}
+                                to={
+                                    '/Lessons?search=author%3A' + lesson?.author?.fullName ??
+                                    lesson?.author?.userName ??
+                                    'deleted'
+                                }
                             />
-                            <Chip size='small' label='tag1' color='primary' />
-                            <Chip size='small' label='tag2' color='primary' />
-                            <Chip size='small' label='tag3' color='primary' />
+                            {lesson?.tags?.map((t) => (
+                                <Chip
+                                    size='small'
+                                    label={t}
+                                    color='primary'
+                                    component={NavLink}
+                                    to={'/Lessons?search=tag%3A' + t}
+                                />
+                            ))}
                         </Stack>
                     </Stack>
                     <Stack direction={'row'} gap={2}>

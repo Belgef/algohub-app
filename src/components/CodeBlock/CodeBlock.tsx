@@ -7,7 +7,7 @@ type CodeBlockProps = {
 
 const CodeBlock = (props: CodeBlockProps) => {
     return (
-        <Paper elevation={4} sx={{ alignSelf: 'stretch', px: 2, mx: 2 }}>
+        <Paper elevation={1} sx={{ alignSelf: 'center', px: 2, mx: 2 }}>
             <Typography variant='caption'>{props.language}</Typography>
             <pre style={{ maxHeight: '54rem', overflow: 'auto' }}>
                 <code className={props.language}>{props.code}</code>
