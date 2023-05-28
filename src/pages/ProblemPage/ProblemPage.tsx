@@ -5,6 +5,7 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import {
     Avatar,
     Box,
+    Button,
     Chip,
     Container,
     IconButton,
@@ -22,8 +23,10 @@ import { CommentViewModel, ProblemCommentViewModel } from '../../api/api';
 import { STORAGE_BASE_URL } from '../../api/constants';
 import { useAddProblemCommentMutation, useGetProblemCommentsQuery } from '../../api/slices/commentApi';
 import {
+    useDeleteProblemMutation,
     useGetProblemByIdQuery,
     useGetVoteForProblemQuery,
+    useRetrieveProblemMutation,
     useVoteForProblemMutation,
 } from '../../api/slices/problemApi';
 import CommentsSection from '../../components/CommentsSection/CommentsSection';
@@ -82,6 +85,8 @@ const ProblemPage = () => {
     const [addProblemComment] = useAddProblemCommentMutation();
     const [voteForLesson] = useVoteForProblemMutation();
     const navigate = useNavigate();
+    const [deleteProblem] = useDeleteProblemMutation();
+    const [retrieveProblem] = useRetrieveProblemMutation();
 
     if (!idRaw || (!problemLoading && !problem)) {
         navigate('/');
@@ -168,6 +173,17 @@ const ProblemPage = () => {
                             <Typography variant='body1'>{problem?.downvotes ?? 0}</Typography>
                         </Stack>
                     </Stack>
+                    {user?.role === 'Administrator' && (
+                        <Button
+                            variant='contained'
+                            color='error'
+                            onClick={() => {
+                                !problem?.deleted ? deleteProblem(id) : retrieveProblem(id);
+                            }}
+                        >
+                            {!problem?.deleted ? 'Delete' : 'Retrieve'}
+                        </Button>
+                    )}
                 </Stack>
                 <Container maxWidth='md'>
                     <Content content={problem?.problemContent} />

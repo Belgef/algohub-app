@@ -2,7 +2,7 @@ import 'highlight.js/styles/vs.css';
 
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import { Avatar, Chip, Container, IconButton, Stack, Typography } from '@mui/material';
+import { Avatar, Button, Chip, Container, IconButton, Stack, Typography } from '@mui/material';
 import hljs from 'highlight.js';
 import React, { useEffect } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
@@ -10,7 +10,7 @@ import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { CommentViewModel, LessonCommentViewModel } from '../../api/api';
 import { STORAGE_BASE_URL } from '../../api/constants';
 import { useAddLessonCommentMutation, useGetLessonCommentsQuery } from '../../api/slices/commentApi';
-import { useGetLessonByIdQuery, useGetVoteForLessonQuery, useVoteForLessonMutation } from '../../api/slices/lessonApi';
+import { useDeleteLessonMutation, useGetLessonByIdQuery, useGetVoteForLessonQuery, useRetrieveLessonMutation, useVoteForLessonMutation } from '../../api/slices/lessonApi';
 import CommentsSection from '../../components/CommentsSection/CommentsSection';
 import Content from '../../components/Content/Content';
 import useAuthorization from '../../hooks/useAuthorization';
@@ -33,6 +33,8 @@ const LessonPage = () => {
     const [addLessonComment] = useAddLessonCommentMutation();
     const [voteForLesson] = useVoteForLessonMutation();
     const navigate = useNavigate();
+    const [deleteLesson] = useDeleteLessonMutation();
+    const [retrieveLesson] = useRetrieveLessonMutation();
 
     if (!idRaw || (!lessonLoading && !lesson)) {
         navigate('/');
@@ -113,6 +115,17 @@ const LessonPage = () => {
                             <Typography variant='body1'>{lesson?.downvotes ?? 0}</Typography>
                         </Stack>
                     </Stack>
+                    {user?.role === 'Administrator' && (
+                        <Button
+                            variant='contained'
+                            color='error'
+                            onClick={() => {
+                                !lesson?.deleted ? deleteLesson(id) : retrieveLesson(id);
+                            }}
+                        >
+                            {!lesson?.deleted ? 'Delete':'Retrieve'}
+                        </Button>
+                    )}
                 </Stack>
                 <Container maxWidth='md'>
                     <Content content={lesson?.lessonContent} />
