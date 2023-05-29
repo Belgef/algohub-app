@@ -13,7 +13,7 @@ import { NavLink } from 'react-router-dom';
 
 import AuthComponent from '../AuthComponent/AuthComponent';
 
-const pages = ['/algohub-app/Problems', '/algohub-app/Lessons'];
+const pages = ['/Problems', '/Lessons'];
 
 const Navbar = () => {
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
@@ -110,7 +110,7 @@ const Navbar = () => {
                                 onClick={handleCloseNavMenu}
                                 sx={{ my: 1, color: 'white', display: 'block' }}
                                 component={NavLink}
-                                to={page}
+                                to={'/algohub-app/'+page}
                             >
                                 {page}
                             </Button>
