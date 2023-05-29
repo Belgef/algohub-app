@@ -2,6 +2,7 @@
   "name": "algohub-fe",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://belgef.github.io/algohub-app",
   "dependencies": {
     "@emotion/react": "^11.10.8",
     "@emotion/styled": "^11.10.8",

@@ -1,7 +1,16 @@
 import axios from 'axios';
 import { IAuthTokens, TokenRefreshRequest, applyAuthTokenInterceptor, getAccessToken } from 'axios-jwt';
 
-import { CommentClient, LessonClient, ProblemClient, SolveClient, StoreClient, TagClient, UserClient, VoteClient } from './api';
+import {
+    CommentClient,
+    LessonClient,
+    ProblemClient,
+    SolveClient,
+    StoreClient,
+    TagClient,
+    UserClient,
+    VoteClient,
+} from './api';
 
 export const axiosInstance = axios.create();
 
@@ -29,11 +38,13 @@ axiosInstance.interceptors.response.use((config) => {
     return config;
 });
 
-export const userClient = new UserClient(undefined, axiosInstance);
-export const problemClient = new ProblemClient(undefined, axiosInstance);
-export const lessonClient = new LessonClient(undefined, axiosInstance);
-export const storeClient = new StoreClient(undefined, axiosInstance);
-export const commentClient = new CommentClient(undefined, axiosInstance);
-export const solveClient = new SolveClient(undefined, axiosInstance);
-export const voteClient = new VoteClient(undefined, axiosInstance);
-export const tagClient = new TagClient(undefined, axiosInstance);
+const baseUrl = 'https://algohubapi.azurewebsites.net';
+
+export const userClient = new UserClient(baseUrl, axiosInstance);
+export const problemClient = new ProblemClient(baseUrl, axiosInstance);
+export const lessonClient = new LessonClient(baseUrl, axiosInstance);
+export const storeClient = new StoreClient(baseUrl, axiosInstance);
+export const commentClient = new CommentClient(baseUrl, axiosInstance);
+export const solveClient = new SolveClient(baseUrl, axiosInstance);
+export const voteClient = new VoteClient(baseUrl, axiosInstance);
+export const tagClient = new TagClient(baseUrl, axiosInstance);
