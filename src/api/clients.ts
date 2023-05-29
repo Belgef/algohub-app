@@ -12,10 +12,12 @@ import {
     VoteClient,
 } from './api';
 
+const baseUrl = 'https://algohubapi.azurewebsites.net';
+
 export const axiosInstance = axios.create();
 
 const requestRefresh: TokenRefreshRequest = async (refreshToken: string): Promise<IAuthTokens | string> => {
-    const response = await new UserClient().refreshToken({ oldJwtToken: getAccessToken() ?? '', refreshToken });
+    const response = await new UserClient(baseUrl).refreshToken({ oldJwtToken: getAccessToken() ?? '', refreshToken });
 
     return {
         accessToken: response.token,
@@ -37,8 +39,6 @@ axiosInstance.interceptors.response.use((config) => {
     }
     return config;
 });
-
-const baseUrl = 'https://algohubapi.azurewebsites.net';
 
 export const userClient = new UserClient(baseUrl, axiosInstance);
 export const problemClient = new ProblemClient(baseUrl, axiosInstance);

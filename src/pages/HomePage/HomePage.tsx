@@ -15,10 +15,10 @@ const HomePage = () => {
     const user = useAuthorization();
 
     let links: (string | undefined)[] = [
-        '/algohub-app/Lessons?sort=popularity',
-        '/algohub-app/Problems?sort=popularity',
-        '/algohub-app/Lessons?sort=newest',
-        '/algohub-app/Problems?sort=newest',
+        '/Lessons?sort=popularity',
+        '/Problems?sort=popularity',
+        '/Lessons?sort=newest',
+        '/Problems?sort=newest',
     ];
     let titles = ['Trending lessons', 'Trending problems', 'New lessons', 'New problems'];
 

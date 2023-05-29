@@ -137,7 +137,7 @@ const ProblemPage = () => {
                                 variant='outlined'
                                 component={NavLink}
                                 to={
-                                    '/algohub-app/Lessons?search=author%3A' + problem?.author?.fullName ??
+                                    '/Lessons?search=author%3A' + problem?.author?.fullName ??
                                     problem?.author?.userName ??
                                     'deleted'
                                 }
@@ -148,7 +148,7 @@ const ProblemPage = () => {
                                     label={t}
                                     color='primary'
                                     component={NavLink}
-                                    to={'/algohub-app/Lessons?search=tag%3A' + t}
+                                    to={'/Lessons?search=tag%3A' + t}
                                 />
                             ))}
                         </Stack>
