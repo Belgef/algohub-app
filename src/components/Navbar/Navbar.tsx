@@ -13,7 +13,7 @@ import { NavLink } from 'react-router-dom';
 
 import AuthComponent from '../AuthComponent/AuthComponent';
 
-const pages = ['Problems', 'Lessons'];
+const pages = ['/algohub-app/Problems', '/algohub-app/Lessons'];
 
 const Navbar = () => {
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
@@ -34,7 +34,7 @@ const Navbar = () => {
                         variant='h6'
                         noWrap
                         component={NavLink}
-                        to='/'
+                        to='/algohub-app/'
                         sx={{
                             mr: 2,
                             display: { xs: 'none', md: 'flex' },
@@ -90,7 +90,7 @@ const Navbar = () => {
                         variant='h5'
                         noWrap
                         component={NavLink}
-                        to='/'
+                        to='/algohub-app/'
                         sx={{
                             mr: 2,
                             display: { xs: 'flex', md: 'none' },

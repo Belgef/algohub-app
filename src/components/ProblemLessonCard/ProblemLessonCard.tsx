@@ -38,7 +38,7 @@ const ProblemLessonCard = (props: ProblemLessonCardProps) => {
         <Card
             sx={{ width: 273, flexShrink: 0, flexGrow: 0 }}
             component={NavLink}
-            to={('problemId' in props.element ? '/Problems/' : '/Lessons/') + p.id.toString()}
+            to={('problemId' in props.element ? '/algohub-app/Problems/' : '/algohub-app/Lessons/') + p.id.toString()}
         >
             <CardMedia
                 sx={{ height: 140 }}
@@ -56,7 +56,7 @@ const ProblemLessonCard = (props: ProblemLessonCardProps) => {
                             label={t}
                             color='primary'
                             component={NavLink}
-                            to={('problemId' in props.element ? '/Problems' : '/Lessons') + '?search=tag%3A' + t}
+                            to={('problemId' in props.element ? '/algohub-app/Problems' : '/algohub-app/Lessons') + '?search=tag%3A' + t}
                         />
                     ))}
                     {(p.tags?.length ?? 0) > 3 && '...'}
@@ -79,7 +79,7 @@ const ProblemLessonCard = (props: ProblemLessonCardProps) => {
                         size='small'
                         component={NavLink}
                         to={
-                            ('problemId' in props.element ? '/Problems' : '/Lessons') +
+                            ('problemId' in props.element ? '/algohub-app/Problems' : '/algohub-app/Lessons') +
                                 '?search=author%3A' +
                                 p?.author?.fullName ??
                             p?.author?.userName ??

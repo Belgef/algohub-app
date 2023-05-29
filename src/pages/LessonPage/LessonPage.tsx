@@ -79,7 +79,7 @@ const LessonPage = () => {
                                 variant='outlined'
                                 component={NavLink}
                                 to={
-                                    '/Lessons?search=author%3A' + lesson?.author?.fullName ??
+                                    '/algohub-app/Lessons?search=author%3A' + lesson?.author?.fullName ??
                                     lesson?.author?.userName ??
                                     'deleted'
                                 }
@@ -90,7 +90,7 @@ const LessonPage = () => {
                                     label={t}
                                     color='primary'
                                     component={NavLink}
-                                    to={'/Lessons?search=tag%3A' + t}
+                                    to={'/algohub-app/Lessons?search=tag%3A' + t}
                                 />
                             ))}
                         </Stack>

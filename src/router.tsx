@@ -12,7 +12,7 @@ import ProblemsPage from './pages/ProblemsPage/ProblemsPage';
 
 export const router = createBrowserRouter([
     {
-        path: '/',
+        path: 'algohub-app/',
         element: <AppLayout />,
         children: [
             {
