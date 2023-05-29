@@ -20,7 +20,7 @@ export class CommentClient {
 
         this.instance = instance ? instance : axios.create();
 
-        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "https://algohubapi.azurewebsites.net/";
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "https://algohubapi.azurewebsites.net";
 
     }
 
