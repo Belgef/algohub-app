@@ -14,8 +14,9 @@ const useAuthorization = (role?: string) => {
     const { data: user, isError, isFetching } = useGetUserByIdQuery(data?.Id);
 
     useEffect(() => {
+        if (user?.role === 'Administrator') return;
         if (role && !isFetching && (isError || user?.role !== role)) {
-            navigate('/?login=true&return='+location.pathname);
+            navigate('/?login=true&return=' + location.pathname);
         }
     });
 
