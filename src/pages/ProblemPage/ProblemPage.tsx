@@ -137,7 +137,7 @@ const ProblemPage = () => {
                                 variant='outlined'
                                 component={NavLink}
                                 to={
-                                    '/Lessons?search=author%3A' + problem?.author?.fullName ??
+                                    '/Problems?search=author%3A' + problem?.author?.fullName ??
                                     problem?.author?.userName ??
                                     'deleted'
                                 }
@@ -148,7 +148,7 @@ const ProblemPage = () => {
                                     label={t}
                                     color='primary'
                                     component={NavLink}
-                                    to={'/Lessons?search=tag%3A' + t}
+                                    to={'/Problems?search=tag%3A' + t}
                                 />
                             ))}
                         </Stack>
