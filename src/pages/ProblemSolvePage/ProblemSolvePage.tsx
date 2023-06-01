@@ -40,7 +40,10 @@ const ProblemSolvePage = () => {
                         <Typography variant='h5' component={'div'}>
                             {problem?.problemName}
                         </Typography>
-                        <Container maxWidth='md' style={{ height: 'calc(87vh - 64px)', overflow: 'auto', margin: '2em 0' }}>
+                        <Container
+                            maxWidth='md'
+                            style={{ height: 'calc(87vh - 64px)', overflow: 'auto', margin: '2em 0' }}
+                        >
                             <Content content={problem?.problemContent} />
                         </Container>
                     </Container>
