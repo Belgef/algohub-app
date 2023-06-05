@@ -5,14 +5,16 @@ import { NavLink } from 'react-router-dom';
 import { useGetDeletedLessonsQuery, useGetLessonsQuery } from '../../api/slices/lessonApi';
 import { useGetDeletedProblemsQuery, useGetProblemsQuery } from '../../api/slices/problemApi';
 import ProblemLessonCard from '../../components/ProblemLessonCard/ProblemLessonCard';
+import { isAdmin } from '../../helpers/userHelpers';
 import useAuthorization from '../../hooks/useAuthorization';
 
 const HomePage = () => {
+    const user = useAuthorization();
+
     const { data: problems } = useGetProblemsQuery();
     const { data: lessons } = useGetLessonsQuery();
-    const { data: dproblems } = useGetDeletedProblemsQuery();
-    const { data: dlessons } = useGetDeletedLessonsQuery();
-    const user = useAuthorization();
+    const { data: deletedProblems } = useGetDeletedProblemsQuery(undefined, { skip: !isAdmin(user) });
+    const { data: deletedLessons } = useGetDeletedLessonsQuery(undefined, { skip: !isAdmin(user) });
 
     let links: (string | undefined)[] = [
         '/Lessons?sort=popularity',
@@ -36,8 +38,8 @@ const HomePage = () => {
         ];
         if (user?.role === 'Administrator') {
             res.push(
-                (dlessons ?? []).slice(0, 11),
-                (dproblems ?? []).slice(0, 11),
+                (deletedLessons ?? []).slice(0, 11),
+                (deletedProblems ?? []).slice(0, 11),
                 [...(lessons ?? [])]
                     .filter((l) => l.upvotes + l.downvotes > 100 && l.downvotes / l.upvotes >= 3)
                     .slice(0, 11),
@@ -47,7 +49,7 @@ const HomePage = () => {
             );
         }
         return res;
-    }, [problems, lessons, user, dlessons, dproblems]);
+    }, [problems, lessons, user, deletedLessons, deletedProblems]);
 
     return (
         <Container maxWidth='lg'>

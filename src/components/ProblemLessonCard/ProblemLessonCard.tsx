@@ -5,93 +5,70 @@ import { NavLink } from 'react-router-dom';
 
 import { LessonViewModel, ProblemViewModel } from '../../api/api';
 import { STORAGE_BASE_URL } from '../../api/constants';
+import { getUserIconUrl, getUserName } from '../../helpers/userHelpers';
 
 type ProblemLessonCardProps = {
     element: ProblemViewModel | LessonViewModel;
 };
 
 const ProblemLessonCard = (props: ProblemLessonCardProps) => {
-    const p = useMemo(
+    const [element, userName, userIconUrl, baseLink, createDate] = useMemo(
         () =>
-            'problemName' in props.element
-                ? {
-                      id: props.element.problemId,
-                      name: props.element.problemName,
-                      imageName: props.element.imageName,
-                      views: props.element.views,
-                      createDate: props.element.createDate,
-                      author: props.element.author,
-                      tags: props.element.tags,
-                  }
-                : {
-                      id: props.element.lessonId,
-                      name: props.element.title,
-                      imageName: props.element.imageName,
-                      views: props.element.views,
-                      createDate: props.element.createDate,
-                      author: props.element.author,
-                      tags: props.element.tags,
-                  },
+            [
+                {
+                    id: 'problemId' in props.element ? props.element.problemId : props.element.lessonId,
+                    name: 'problemName' in props.element ? props.element.problemName : props.element.title,
+                    imageName: props.element.imageName,
+                    views: props.element.views,
+                    createDate: props.element.createDate,
+                    author: props.element.author,
+                    tags: props.element.tags,
+                },
+                getUserName(props.element.author),
+                getUserIconUrl(props.element.author),
+                'problemName' in props.element ? '/Problems/' : '/Lessons/',
+                moment.utc(props.element.createDate).local().calendar().toLocaleString(),
+            ] as const,
         [props.element]
     );
     return (
-        <Card
-            sx={{ width: 273, flexShrink: 0, flexGrow: 0 }}
-            component={NavLink}
-            to={('problemId' in props.element ? '/Problems/' : '/Lessons/') + p.id.toString()}
-        >
+        <Card sx={{ width: 273, flexShrink: 0, flexGrow: 0 }} component={NavLink} to={baseLink + element.id.toString()}>
             <CardMedia
                 sx={{ height: 140 }}
-                image={STORAGE_BASE_URL + (p.imageName ?? 'placeholder-16-9.jpg')}
-                title={p.name}
+                image={STORAGE_BASE_URL + (element.imageName ?? 'placeholder-16-9.jpg')}
+                title={element.name}
             />
             <CardContent>
                 <Typography gutterBottom variant='h5' component='div'>
-                    {p.name}
+                    {element.name}
                 </Typography>
                 <Stack direction={'row'} gap={0.5}>
-                    {p.tags?.slice(0, 3)?.map((t) => (
+                    {element.tags?.slice(0, 3)?.map((t) => (
                         <Chip
                             size='small'
                             label={t}
                             color='primary'
                             component={NavLink}
-                            to={('problemId' in props.element ? '/Problems' : '/Lessons') + '?search=tag%3A' + t}
+                            to={baseLink + '?search=tag%3A' + t}
                         />
                     ))}
-                    {(p.tags?.length ?? 0) > 3 && '...'}
+                    {(element.tags?.length ?? 0) > 3 && '...'}
                 </Stack>
                 <Stack direction={'row'} gap={2} flexWrap='wrap' alignItems='center' sx={{ marginTop: '0.5em' }}>
                     <Chip
-                        avatar={
-                            <Avatar
-                                alt='Natacha'
-                                src={
-                                    p?.author?.iconName
-                                        ? STORAGE_BASE_URL + p?.author.iconName
-                                        : 'https://ui-avatars.com/api/?rounded=true&name=' +
-                                          (p?.author?.fullName ?? p?.author?.userName ?? 'deleted')
-                                }
-                            />
-                        }
-                        label={p?.author?.fullName ?? p?.author?.userName ?? 'deleted'}
+                        avatar={<Avatar alt={userName} src={userIconUrl} />}
+                        label={userName}
                         variant='outlined'
                         size='small'
                         component={NavLink}
-                        to={
-                            ('problemId' in props.element ? '/Problems' : '/Lessons') +
-                                '?search=author%3A' +
-                                p?.author?.fullName ??
-                            p?.author?.userName ??
-                            'deleted'
-                        }
+                        to={baseLink + '?search=author%3A' + userName}
                     />
                     <Typography variant='body2' color='text.secondary'>
-                        {p.views} views
+                        {element.views} views
                     </Typography>
                 </Stack>
                 <Typography variant='body2' color='text.secondary' mt={1}>
-                    {moment.utc(p.createDate).local().calendar().toLocaleString()}
+                    {createDate}
                 </Typography>
             </CardContent>
         </Card>
