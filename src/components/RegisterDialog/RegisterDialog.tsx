@@ -54,7 +54,7 @@ const RegisterDialog = (props: RegisterDialogProps) => {
                 Register
             </Button>
             <Dialog open={params.has('register') && props.enabled} onClose={handleClose}>
-                <form onSubmit={handleSubmit(onSubmit, (err) => console.log(err))}>
+                <form onSubmit={handleSubmit(onSubmit)}>
                     <DialogTitle>
                         {' '}
                         <CardHeader

@@ -1,6 +1,6 @@
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import { FormHelperText, IconButton, Stack, Typography } from '@mui/material';
+import { Chip, FormHelperText, IconButton } from '@mui/material';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -22,6 +22,16 @@ const normalizeComments = (comments: SolveCommentViewModel[]): CommentViewModel[
         replies: c.replies ? normalizeComments(c.replies) : undefined,
     }));
 
+    const getMemoryString = (bytes:number)=>{
+        if(bytes < 512){
+            return `${bytes} bytes`
+        }else if(bytes/1024 < 512){
+            return `${Math.trunc(bytes/1024*10)/10} Kb`
+        }else if(bytes/1024/1024 < 512){
+            return `${Math.trunc(bytes/1024/1024*10)/10} Mb`
+        }
+    }
+
 type SolveProps = {
     solve: SolveViewModel;
 };
@@ -36,7 +46,6 @@ const Solve = (props: SolveProps) => {
     const { control, handleSubmit, reset } = useForm<{ reply: string }>({ defaultValues: { reply: '' } });
 
     const onReply = (message: string, parentCommentId?: number | undefined) => {
-        console.log(message);
         addSolveComment({
             content: message,
             parentCommentId: parentCommentId,
@@ -62,6 +71,10 @@ const Solve = (props: SolveProps) => {
                 <CommentElement.Metadata>
                     <div>{moment.utc(props.solve?.createDate).local().calendar().toLocaleString()}</div>
                 </CommentElement.Metadata>
+                <CommentElement.Text>
+                    <Chip size='small' label={`Time: ${props.solve.timeMs} ms`} color='primary' sx={{mr:1}} />
+                    <Chip size='small' label={`Memory: ${getMemoryString(props.solve.memoryBytes??0)}`} color='primary' />
+                </CommentElement.Text>
                 <CommentElement.Text>
                     <CodeBlock code={props.solve?.code} language={props.solve?.language?.languageInternalName} />
                 </CommentElement.Text>

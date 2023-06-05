@@ -7,7 +7,7 @@ import { useGetSolvesQuery } from '../../api/slices/solveApi';
 import Solve from '../Solve/Solve';
 
 type SolvesSectionProps = {};
-type Sort = 'pop' | 'new' | 'old' | 'rate';
+type Sort = 'pop' | 'new' | 'old' | 'rate' | 'time' | 'mem';
 type Language = '-' | 'csharp' | 'java' | 'javascript' | 'php' | 'python' | 'cpp';
 
 const SolvesSection = (props: SolvesSectionProps) => {
@@ -26,6 +26,8 @@ const SolvesSection = (props: SolvesSectionProps) => {
                         <MenuItem value={'rate'}>Rating</MenuItem>
                         <MenuItem value={'new'}>Newest</MenuItem>
                         <MenuItem value={'old'}>Oldest</MenuItem>
+                        <MenuItem value={'time'}>Fastest</MenuItem>
+                        <MenuItem value={'mem'}>Lowest memory</MenuItem>
                     </Select>
                 </FormControl>
                 <FormControl sx={{ m: 1, minWidth: 120 }}>
@@ -59,6 +61,10 @@ const SolvesSection = (props: SolvesSectionProps) => {
                             );
                         } else if (sort === 'new') {
                             return a.createDate! < b.createDate! ? 1 : -1;
+                        } else if (sort === 'time') {
+                            return (a.timeMs ?? 0) - (b.timeMs ?? 0);
+                        } else if (sort === 'mem') {
+                            return (a.memoryBytes ?? 0) - (b.memoryBytes ?? 0);
                         } else {
                             return a.createDate! > b.createDate! ? 1 : -1;
                         }

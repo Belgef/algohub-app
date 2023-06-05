@@ -17,33 +17,33 @@ const HomePage = () => {
     const { data: deletedLessons } = useGetDeletedLessonsQuery(undefined, { skip: !isAdmin(user) });
 
     let links: (string | undefined)[] = [
-        '/Lessons?sort=popularity',
         '/Problems?sort=popularity',
-        '/Lessons?sort=newest',
+        '/Lessons?sort=popularity',
         '/Problems?sort=newest',
+        '/Lessons?sort=newest',
     ];
-    let titles = ['Trending lessons', 'Trending problems', 'New lessons', 'New problems'];
+    let titles = ['Trending problems', 'Trending lessons', 'New problems', 'New lessons'];
 
     if (user?.role === 'Administrator') {
         links.push(undefined, undefined, undefined, undefined);
-        titles.push('Deleted lessons', 'Deleted problems', 'Lesson deletion queue', 'Problem deletion queue');
+        titles.push('Deleted problems', 'Deleted lessons', 'Problem deletion queue', 'Lesson deletion queue');
     }
 
     const sets = useMemo(() => {
         let res = [
-            [...(lessons ?? [])].sort((a, b) => b.views - a.views).slice(0, 11),
             [...(problems ?? [])].sort((a, b) => b.views - a.views).slice(0, 11),
-            [...(lessons ?? [])].sort((a, b) => (b.createDate > a.createDate ? 1 : -1)).slice(0, 11),
+            [...(lessons ?? [])].sort((a, b) => b.views - a.views).slice(0, 11),
             [...(problems ?? [])].sort((a, b) => (b.createDate > a.createDate ? 1 : -1)).slice(0, 11),
+            [...(lessons ?? [])].sort((a, b) => (b.createDate > a.createDate ? 1 : -1)).slice(0, 11),
         ];
         if (user?.role === 'Administrator') {
             res.push(
-                (deletedLessons ?? []).slice(0, 11),
                 (deletedProblems ?? []).slice(0, 11),
-                [...(lessons ?? [])]
+                (deletedLessons ?? []).slice(0, 11),
+                [...(problems ?? [])]
                     .filter((l) => l.upvotes + l.downvotes > 100 && l.downvotes / l.upvotes >= 3)
                     .slice(0, 11),
-                [...(problems ?? [])]
+                [...(lessons ?? [])]
                     .filter((l) => l.upvotes + l.downvotes > 100 && l.downvotes / l.upvotes >= 3)
                     .slice(0, 11)
             );

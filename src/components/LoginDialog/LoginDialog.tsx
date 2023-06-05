@@ -46,7 +46,7 @@ const LoginDialog = (props: LoginDialogProps) => {
                 Login
             </Button>
             <Dialog open={params.has('login') && props.enabled} onClose={handleClose}>
-                <form onSubmit={handleSubmit(onSubmit, (err) => console.log(err))}>
+                <form onSubmit={handleSubmit(onSubmit)}>
                     <DialogTitle>Login</DialogTitle>
                     <DialogContent>
                         <Controller

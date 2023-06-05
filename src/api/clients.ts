@@ -12,7 +12,7 @@ import {
     VoteClient,
 } from './api';
 
-const baseUrl = 'https://algohubapi.azurewebsites.net';
+const baseUrl = undefined;//'https://algohubapi.azurewebsites.net';
 
 export const axiosInstance = axios.create();
 
@@ -26,19 +26,6 @@ const requestRefresh: TokenRefreshRequest = async (refreshToken: string): Promis
 };
 
 applyAuthTokenInterceptor(axiosInstance, { requestRefresh });
-
-// axiosInstance.interceptors.request.use((config) => {
-//     config.headers.Authorization =  getAccessToken();
-
-//     return config;
-// });
-
-axiosInstance.interceptors.response.use((config) => {
-    if (config.status !== 200) {
-        console.log(config);
-    }
-    return config;
-});
 
 export const userClient = new UserClient(baseUrl, axiosInstance);
 export const problemClient = new ProblemClient(baseUrl, axiosInstance);

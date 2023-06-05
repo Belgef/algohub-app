@@ -67,7 +67,6 @@ const LessonAddPage = () => {
     const { data: tags } = useGetTagsQuery();
 
     const onSubmit = async (lesson: LessonCreate) => {
-        console.log(lesson);
         const newContent: ContentElement[] = [];
         for (let i = 0; i < (lesson.lessonContent?.length ?? 0); i++) {
             const imageName =
@@ -96,7 +95,7 @@ const LessonAddPage = () => {
             <Typography gutterBottom ml={1} variant='h4' component='h4'>
                 Create new lesson
             </Typography>
-            <Stack gap={2} component='form' onSubmit={handleSubmit(onSubmit, (err) => console.log(err))}>
+            <Stack gap={2} component='form' onSubmit={handleSubmit(onSubmit)}>
                 <Controller
                     control={control}
                     name='image'
@@ -138,34 +137,31 @@ const LessonAddPage = () => {
                 <Controller
                     control={control}
                     name='tags'
-                    render={({ field, fieldState }) => {
-                        console.log(field.value);
-                        return (
-                            <Autocomplete
-                                multiple
-                                options={tags ?? []}
-                                {...field}
-                                onChange={(_e, v) => field.onChange(v)}
-                                freeSolo
-                                renderTags={(value: readonly string[], getTagProps) =>
-                                    value.map((option: string, index: number) => (
-                                        <Chip variant='outlined' label={option} {...getTagProps({ index })} />
-                                    ))
-                                }
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        label='Tags'
-                                        fullWidth
-                                        variant='outlined'
-                                        placeholder='eg. graph-theory'
-                                        error={fieldState.invalid}
-                                        helperText={fieldState.error?.message}
-                                    />
-                                )}
-                            />
-                        );
-                    }}
+                    render={({ field, fieldState }) => (
+                        <Autocomplete
+                            multiple
+                            options={tags ?? []}
+                            {...field}
+                            onChange={(_e, v) => field.onChange(v)}
+                            freeSolo
+                            renderTags={(value: readonly string[], getTagProps) =>
+                                value.map((option: string, index: number) => (
+                                    <Chip variant='outlined' label={option} {...getTagProps({ index })} />
+                                ))
+                            }
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label='Tags'
+                                    fullWidth
+                                    variant='outlined'
+                                    placeholder='eg. graph-theory'
+                                    error={fieldState.invalid}
+                                    helperText={fieldState.error?.message}
+                                />
+                            )}
+                        />
+                    )}
                     rules={{
                         validate: {
                             unique: (value) => (new Set(value).size === value.length ? true : 'Tags must be unique'),

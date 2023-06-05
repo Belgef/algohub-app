@@ -86,7 +86,6 @@ const ProblemAddPage = () => {
     const { data: tags } = useGetTagsQuery();
 
     const onSubmit = async (problem: ProblemCreate) => {
-        console.log(problem);
         const newContent: ContentElement[] = [];
         for (let i = 0; i < (problem.problemContent?.length ?? 0); i++) {
             const imageName =
@@ -104,6 +103,7 @@ const ProblemAddPage = () => {
             problemContent: JSON.stringify(newContent),
             testsString: JSON.stringify(problem.tests),
             tagsString: JSON.stringify(problem.tags),
+            memoryLimitBytes: problem.memoryLimitBytes ? problem.memoryLimitBytes * 1024 : problem.memoryLimitBytes,
         });
 
         if ('data' in result) {
@@ -116,7 +116,7 @@ const ProblemAddPage = () => {
             <Typography gutterBottom variant='h4' ml={1} component='h4'>
                 Create new problem
             </Typography>
-            <Stack gap={2} component='form' onSubmit={handleSubmit(onSubmit, (err) => console.log(err))}>
+            <Stack gap={2} component='form' onSubmit={handleSubmit(onSubmit)}>
                 <Stack direction={'row'} width={'100%'} gap={'2em'}>
                     <Stack>
                         <Controller
@@ -183,7 +183,7 @@ const ProblemAddPage = () => {
                                     <TextField
                                         fullWidth
                                         margin='dense'
-                                        label='Memory limit (bytes)'
+                                        label='Memory limit (Mb)'
                                         type='number'
                                         variant='outlined'
                                         size='small'
@@ -194,8 +194,8 @@ const ProblemAddPage = () => {
                                 )}
                                 rules={{
                                     required: { value: true, message: 'Memory limit is required' },
-                                    min: { value: 1, message: 'Memory limit must be at least 1 byte' },
-                                    max: { value: 10240, message: 'Memory limit cannot exceed 10240 bytes (10 Mb)' },
+                                    min: { value: 1, message: 'Memory limit must be at least 1 Kb' },
+                                    max: { value: 131072, message: 'Memory limit cannot exceed 131072 Kb (128 Mb)' },
                                     pattern: {
                                         value: /^[^.,]+$/,
                                         message: 'Memory limit must be a whole number',
@@ -221,34 +221,31 @@ const ProblemAddPage = () => {
                 <Controller
                     control={control}
                     name='tags'
-                    render={({ field, fieldState }) => {
-                        console.log(field.value);
-                        return (
-                            <Autocomplete
-                                multiple
-                                options={tags ?? []}
-                                {...field}
-                                onChange={(_e, v) => field.onChange(v)}
-                                freeSolo
-                                renderTags={(value: readonly string[], getTagProps) =>
-                                    value.map((option: string, index: number) => (
-                                        <Chip variant='outlined' label={option} {...getTagProps({ index })} />
-                                    ))
-                                }
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        label='Tags'
-                                        fullWidth
-                                        variant='outlined'
-                                        placeholder='eg. graph-theory'
-                                        error={fieldState.invalid}
-                                        helperText={fieldState.error?.message}
-                                    />
-                                )}
-                            />
-                        );
-                    }}
+                    render={({ field, fieldState }) => (
+                        <Autocomplete
+                            multiple
+                            options={tags ?? []}
+                            {...field}
+                            onChange={(_e, v) => field.onChange(v)}
+                            freeSolo
+                            renderTags={(value: readonly string[], getTagProps) =>
+                                value.map((option: string, index: number) => (
+                                    <Chip variant='outlined' label={option} {...getTagProps({ index })} />
+                                ))
+                            }
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label='Tags'
+                                    fullWidth
+                                    variant='outlined'
+                                    placeholder='eg. graph-theory'
+                                    error={fieldState.invalid}
+                                    helperText={fieldState.error?.message}
+                                />
+                            )}
+                        />
+                    )}
                     rules={{
                         validate: {
                             unique: (value) => (new Set(value).size === value.length ? true : 'Tags must be unique'),
