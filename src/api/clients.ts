@@ -12,7 +12,7 @@ import {
     VoteClient,
 } from './api';
 
-const baseUrl = undefined;//'https://algohubapi.azurewebsites.net';
+const baseUrl = 'https://algohubapi.azurewebsites.net';
 
 export const axiosInstance = axios.create();
 
