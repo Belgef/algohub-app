@@ -8,6 +8,7 @@ import { Button, Comment as CommentElement, Form } from 'semantic-ui-react';
 
 import { CommentViewModel, SolveCommentViewModel, SolveViewModel } from '../../api/api';
 import { STORAGE_BASE_URL } from '../../api/constants';
+import { useAppSelector } from '../../api/hooks';
 import { useAddSolveCommentMutation, useGetSolveCommentsQuery } from '../../api/slices/commentApi';
 import { useGetVoteForSolveQuery, useVoteForSolveMutation } from '../../api/slices/solveApi';
 import useAuthorization from '../../hooks/useAuthorization';
@@ -22,15 +23,15 @@ const normalizeComments = (comments: SolveCommentViewModel[]): CommentViewModel[
         replies: c.replies ? normalizeComments(c.replies) : undefined,
     }));
 
-    const getMemoryString = (bytes:number)=>{
-        if(bytes < 512){
-            return `${bytes} bytes`
-        }else if(bytes/1024 < 512){
-            return `${Math.trunc(bytes/1024*10)/10} Kb`
-        }else if(bytes/1024/1024 < 512){
-            return `${Math.trunc(bytes/1024/1024*10)/10} Mb`
-        }
+const getMemoryString = (bytes: number) => {
+    if (bytes < 512) {
+        return `${bytes} bytes`;
+    } else if (bytes / 1024 < 512) {
+        return `${Math.trunc((bytes / 1024) * 10) / 10} Kb`;
+    } else if (bytes / 1024 / 1024 < 512) {
+        return `${Math.trunc((bytes / 1024 / 1024) * 10) / 10} Mb`;
     }
+};
 
 type SolveProps = {
     solve: SolveViewModel;
@@ -44,6 +45,7 @@ const Solve = (props: SolveProps) => {
     const [voteForSolve] = useVoteForSolveMutation();
     const [reply, setReply] = useState(false);
     const { control, handleSubmit, reset } = useForm<{ reply: string }>({ defaultValues: { reply: '' } });
+    const theme = useAppSelector((state) => state.appSlice.theme);
 
     const onReply = (message: string, parentCommentId?: number | undefined) => {
         addSolveComment({
@@ -65,25 +67,47 @@ const Solve = (props: SolveProps) => {
                 className='roundedIcon'
             />
             <CommentElement.Content>
-                <CommentElement.Author as='a'>
+                <CommentElement.Author as='a' className={theme === 'dark' ? 'white-text' : 'black-text'}>
                     {props.solve?.author?.fullName ?? '@' + props.solve?.author?.userName ?? 'deleted'}
                 </CommentElement.Author>
-                <CommentElement.Metadata>
+                <CommentElement.Metadata className={theme === 'dark' ? 'white-text' : 'black-text'}>
                     <div>{moment.utc(props.solve?.createDate).local().calendar().toLocaleString()}</div>
                 </CommentElement.Metadata>
                 <CommentElement.Text>
-                    <Chip size='small' label={`Time: ${props.solve.timeMs} ms`} color='primary' sx={{mr:1}} />
-                    <Chip size='small' label={`Memory: ${getMemoryString(props.solve.memoryBytes??0)}`} color='primary' />
+                    <Chip
+                        size='small'
+                        label={`Time: ${props.solve.timeMs} ms`}
+                        color='primary'
+                        sx={(theme) => ({
+                            boxShadow: '2px 2px 4px #00000040',
+                            backgroundColor: theme.palette.mode === 'dark' ? 'grey.800' : 'primary.main',
+                            color: 'white',
+                            mr: 1,
+                        })}
+                    />
+                    <Chip
+                        size='small'
+                        label={`Memory: ${getMemoryString(props.solve.memoryBytes ?? 0)}`}
+                        color='primary'
+                        sx={(theme) => ({
+                            boxShadow: '2px 2px 4px #00000040',
+                            backgroundColor: theme.palette.mode === 'dark' ? 'grey.800' : 'primary.main',
+                            color: 'white',
+                        })}
+                    />
                 </CommentElement.Text>
                 <CommentElement.Text>
                     <CodeBlock code={props.solve?.code} language={props.solve?.language?.languageInternalName} />
                 </CommentElement.Text>
                 {user && (
                     <CommentElement.Actions>
-                        <CommentElement.Action onClick={() => setReply(!reply)}>
+                        <CommentElement.Action
+                            onClick={() => setReply(!reply)}
+                            className={theme === 'dark' ? 'white-text' : 'black-text'}
+                        >
                             {reply ? 'Cancel reply' : 'Reply'}
                         </CommentElement.Action>
-                        <CommentElement.Action active>
+                        <CommentElement.Action active className={theme === 'dark' ? 'white-text' : 'black-text'}>
                             <IconButton
                                 onClick={() => voteForSolve({ solveId: props.solve.solveId ?? -1, isUpvote: true })}
                                 disabled={!user || vote === true}
@@ -92,7 +116,7 @@ const Solve = (props: SolveProps) => {
                             </IconButton>
                             {props.solve?.upvotes ?? 0}
                         </CommentElement.Action>
-                        <CommentElement.Action active>
+                        <CommentElement.Action active className={theme === 'dark' ? 'white-text' : 'black-text'}>
                             <IconButton
                                 onClick={() => voteForSolve({ solveId: props.solve.solveId ?? -1, isUpvote: false })}
                                 disabled={!user || vote === false}

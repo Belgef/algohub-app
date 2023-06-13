@@ -1,5 +1,3 @@
-import 'highlight.js/styles/vs.css';
-
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import {
@@ -10,13 +8,13 @@ import {
     Container,
     IconButton,
     Button as MUIButton,
+    Paper,
     Stack,
     Tab,
     Tabs,
     Typography,
 } from '@mui/material';
-import hljs from 'highlight.js';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
 
 import { CommentViewModel, ProblemCommentViewModel } from '../../api/api';
@@ -32,6 +30,7 @@ import {
 import CommentsSection from '../../components/CommentsSection/CommentsSection';
 import Content from '../../components/Content/Content';
 import SolvesSection from '../../components/SolvesSection/SolvesSection';
+import Tag from '../../components/Tag/Tag';
 import useAuthorization from '../../hooks/useAuthorization';
 
 const normalizeComments = (comments: ProblemCommentViewModel[]): CommentViewModel[] =>
@@ -68,7 +67,7 @@ function TabPanel(props: TabPanelProps) {
         >
             {value === index && (
                 <Box sx={{ p: 3 }}>
-                    <Typography>{children}</Typography>
+                    <Typography component='div'>{children}</Typography>
                 </Box>
             )}
         </div>
@@ -98,8 +97,6 @@ const ProblemPage = () => {
         addProblemComment({ rootId: id, parentCommentId: parentComment, content: message });
     };
 
-    useEffect(() => hljs.highlightAll());
-
     const [value, setValue] = React.useState(0);
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -108,110 +105,108 @@ const ProblemPage = () => {
 
     return (
         <Container maxWidth='lg'>
-            <Stack>
-                <img
-                    src={STORAGE_BASE_URL + problem?.imageName}
-                    style={{ maxWidth: '100%', maxHeight: '50vh', alignSelf: 'center' }}
-                    alt='mainImage'
-                    onError={(event) => (event.currentTarget.style.display = 'none')}
-                />
-                <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'} mt='1em'>
-                    <Stack>
-                        <Typography gutterBottom variant='h4' component='div'>
-                            {problem?.problemName}
-                        </Typography>
-                        <Stack direction={'row'} alignItems={'center'} gap={0.5} ml={2}>
-                            <Chip
-                                avatar={
-                                    <Avatar
-                                        alt={problem?.author?.fullName ?? problem?.author?.userName ?? 'deleted'}
-                                        src={
-                                            problem?.author?.iconName
-                                                ? STORAGE_BASE_URL + problem?.author.iconName
-                                                : 'https://ui-avatars.com/api/?rounded=true&name=' +
-                                                  (problem?.author?.fullName ?? problem?.author?.userName ?? 'deleted')
-                                        }
-                                    />
-                                }
-                                label={problem?.author?.fullName ?? problem?.author?.userName ?? 'deleted'}
-                                variant='outlined'
-                                component={NavLink}
-                                to={
-                                    '/Problems?search=author%3A' + problem?.author?.fullName ??
-                                    problem?.author?.userName ??
-                                    'deleted'
-                                }
-                            />
-                            {problem?.tags?.map((t) => (
+            <Paper sx={{ px: 2, mt: '1em', pb: '1em' }} elevation={6}>
+                <Stack>
+                    <img
+                        src={STORAGE_BASE_URL + problem?.imageName}
+                        style={{ maxWidth: '100%', maxHeight: '30vh', alignSelf: 'center' }}
+                        alt='mainImage'
+                        onError={(event) => (event.currentTarget.style.display = 'none')}
+                    />
+                    <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'} mt='1em'>
+                        <Stack>
+                            <Typography gutterBottom variant='h4' component='div'>
+                                {problem?.problemName}
+                            </Typography>
+                            <Stack direction={'row'} alignItems={'center'} gap={0.5} ml={2}>
                                 <Chip
-                                    size='small'
-                                    label={t}
-                                    color='primary'
+                                    avatar={
+                                        <Avatar
+                                            alt={problem?.author?.fullName ?? problem?.author?.userName ?? 'deleted'}
+                                            src={
+                                                problem?.author?.iconName
+                                                    ? STORAGE_BASE_URL + problem?.author.iconName
+                                                    : 'https://ui-avatars.com/api/?rounded=true&name=' +
+                                                      (problem?.author?.fullName ??
+                                                          problem?.author?.userName ??
+                                                          'deleted')
+                                            }
+                                        />
+                                    }
+                                    label={problem?.author?.fullName ?? problem?.author?.userName ?? 'deleted'}
+                                    variant='outlined'
                                     component={NavLink}
-                                    to={'/Problems?search=tag%3A' + t}
+                                    to={
+                                        '/Problems?search=author%3A' + problem?.author?.fullName ??
+                                        problem?.author?.userName ??
+                                        'deleted'
+                                    }
                                 />
-                            ))}
+                                {problem?.tags?.map((t) => (
+                                    <Tag tag={t} isProblem key={t} />
+                                ))}
+                            </Stack>
                         </Stack>
-                    </Stack>
-                    <Stack direction={'row'} gap={2}>
-                        <Stack alignItems={'center'}>
-                            <IconButton
-                                onClick={() => voteForLesson({ problemId: id, isUpvote: true })}
-                                disabled={!user || vote === true}
+                        <Stack direction={'row'} gap={2}>
+                            <Stack alignItems={'center'}>
+                                <IconButton
+                                    onClick={() => voteForLesson({ problemId: id, isUpvote: true })}
+                                    disabled={!user || vote === true}
+                                >
+                                    <ThumbUpIcon fontSize='large' color={vote === true ? 'primary' : undefined} />
+                                </IconButton>
+                                <Typography variant='body1'>{problem?.upvotes ?? 0}</Typography>
+                            </Stack>
+                            <Stack alignItems={'center'}>
+                                <IconButton
+                                    onClick={() => voteForLesson({ problemId: id, isUpvote: false })}
+                                    disabled={!user || vote === false}
+                                >
+                                    <ThumbDownIcon fontSize='large' color={vote === false ? 'primary' : undefined} />
+                                </IconButton>
+                                <Typography variant='body1'>{problem?.downvotes ?? 0}</Typography>
+                            </Stack>
+                        </Stack>
+                        {user?.role === 'Administrator' && (
+                            <Button
+                                variant='contained'
+                                color='error'
+                                onClick={() => {
+                                    !problem?.deleted ? deleteProblem(id) : retrieveProblem(id);
+                                }}
                             >
-                                <ThumbUpIcon fontSize='large' color={vote === true ? 'primary' : undefined} />
-                            </IconButton>
-                            <Typography variant='body1'>{problem?.upvotes ?? 0}</Typography>
-                        </Stack>
-                        <Stack alignItems={'center'}>
-                            <IconButton
-                                onClick={() => voteForLesson({ problemId: id, isUpvote: false })}
-                                disabled={!user || vote === false}
-                            >
-                                <ThumbDownIcon fontSize='large' color={vote === false ? 'primary' : undefined} />
-                            </IconButton>
-                            <Typography variant='body1'>{problem?.downvotes ?? 0}</Typography>
-                        </Stack>
+                                {!problem?.deleted ? 'Delete' : 'Retrieve'}
+                            </Button>
+                        )}
                     </Stack>
-                    {user?.role === 'Administrator' && (
-                        <Button
-                            variant='contained'
-                            color='error'
-                            onClick={() => {
-                                !problem?.deleted ? deleteProblem(id) : retrieveProblem(id);
-                            }}
-                        >
-                            {!problem?.deleted ? 'Delete' : 'Retrieve'}
-                        </Button>
-                    )}
+                    <Container maxWidth='md'>
+                        <Content content={problem?.problemContent} />
+                    </Container>
+                    <MUIButton
+                        size='large'
+                        variant='contained'
+                        sx={{ width: 200, alignSelf: 'center' }}
+                        component={NavLink}
+                        to='solve'
+                    >
+                        Solve
+                    </MUIButton>
                 </Stack>
                 <Container maxWidth='md'>
-                    <Content content={problem?.problemContent} />
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                        <Tabs value={value} onChange={handleChange} aria-label='basic tabs example'>
+                            <Tab label='Solves' {...a11yProps(0)} />
+                            <Tab label='Comments' {...a11yProps(1)} />
+                        </Tabs>
+                    </Box>
+                    <TabPanel value={value} index={0}>
+                        <SolvesSection />
+                    </TabPanel>
+                    <TabPanel value={value} index={1}>
+                        <CommentsSection comments={normComments} noTitle onReply={handleReply} />
+                    </TabPanel>
                 </Container>
-                <MUIButton
-                    size='large'
-                    variant='contained'
-                    sx={{ width: 200, alignSelf: 'center' }}
-                    component={NavLink}
-                    to='solve'
-                >
-                    Solve
-                </MUIButton>
-            </Stack>
-            <Container maxWidth='md'>
-                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Tabs value={value} onChange={handleChange} aria-label='basic tabs example'>
-                        <Tab label='Solves' {...a11yProps(0)} />
-                        <Tab label='Comments' {...a11yProps(1)} />
-                    </Tabs>
-                </Box>
-                <TabPanel value={value} index={0}>
-                    <SolvesSection />
-                </TabPanel>
-                <TabPanel value={value} index={1}>
-                    <CommentsSection comments={normComments} noTitle onReply={handleReply} />
-                </TabPanel>
-            </Container>
+            </Paper>
         </Container>
     );
 };

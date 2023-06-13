@@ -1,16 +1,15 @@
 import { Avatar, Box, IconButton, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
 import React from 'react';
 
-import { userClient } from '../../api/clients';
 import { STORAGE_BASE_URL } from '../../api/constants';
-import useAuth from '../../hooks/useAuth';
+import { useLogoutMutation } from '../../api/slices/userApi';
 import useAuthorization from '../../hooks/useAuthorization';
 import LoginDialog from '../LoginDialog/LoginDialog';
 import RegisterDialog from '../RegisterDialog/RegisterDialog';
 
 const AuthComponent = () => {
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
-    const { loggedIn, handleLogin, handleLogout } = useAuth();
+    const [logout] = useLogoutMutation();
 
     const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElUser(event.currentTarget);
@@ -19,17 +18,19 @@ const AuthComponent = () => {
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
     };
-    
+
     const user = useAuthorization();
 
-    const name = user?.fullName ?? user?.userName;
+    const name = user?.fullName ?? user?.userName ?? 'deleted';
 
-    return loggedIn ? (
+    return (
         <>
-            <Box sx={{ flexGrow: 0 }}>
+            <LoginDialog mode='md' />
+            <RegisterDialog mode='md' />
+            <Box sx={{ flexGrow: 0, display: user ? 'block' : 'none' }}>
                 <Tooltip title={`Open ${name} settings`}>
                     <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                        <Avatar alt={name} src={user?.iconName ? STORAGE_BASE_URL + user.iconName : 'notfound'} />
+                        <Avatar alt={name} src={user?.iconName ? STORAGE_BASE_URL + user.iconName : 'deleted'} />
                     </IconButton>
                 </Tooltip>
                 <Menu
@@ -57,21 +58,13 @@ const AuthComponent = () => {
                     <MenuItem
                         onClick={() => {
                             handleCloseUserMenu();
-                            handleLogout();
+                            logout(null);
                         }}
                     >
                         <Typography textAlign='center'>Logout</Typography>
                     </MenuItem>
                 </Menu>
             </Box>
-        </>
-    ) : (
-        <>
-            <LoginDialog enabled={!loggedIn} onSubmit={async (user) => await handleLogin(user)} />
-            <RegisterDialog
-                enabled={!loggedIn}
-                onSubmit={async (user) => await userClient.register(user) }
-            />
         </>
     );
 };

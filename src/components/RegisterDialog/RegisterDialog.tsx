@@ -6,26 +6,29 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
+    MenuItem,
     TextField,
     Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { useSearchParams } from 'react-router-dom';
+import { NavLink, useSearchParams } from 'react-router-dom';
 
 import { UserCreateViewModel } from '../../api/api';
 import { userClient } from '../../api/clients';
+import { useGetUserQuery, useRegisterMutation } from '../../api/slices/userApi';
 import StyledDropzone from '../Dropzone/Dropzone';
 
 export type RegisterDialogProps = {
-    enabled: boolean;
-    onSubmit: (user: UserCreateViewModel) => string | Promise<string>;
-    onClose?: () => void;
+    mode: 'xs' | 'md';
+    onClick?: () => void;
 };
 
 const RegisterDialog = (props: RegisterDialogProps) => {
     const [params, setParams] = useSearchParams();
     const [iconUrl, setIconUrl] = useState('');
+    const [register] = useRegisterMutation();
+    const { data: user } = useGetUserQuery();
 
     const { handleSubmit, control } = useForm<UserCreateViewModel>({
         defaultValues: { userName: '', fullName: '', email: '', password: '', confirmPassword: '' },
@@ -39,21 +42,38 @@ const RegisterDialog = (props: RegisterDialogProps) => {
     const handleClose = () => {
         params.delete('register');
         setParams(params);
-        props.onClose?.();
     };
 
     const onSubmit = async (user: UserCreateViewModel) => {
-        if (await props.onSubmit(user)) {
+        if (await register(user)) {
             handleClose();
         }
     };
 
-    return (
+    return user ? null : (
         <>
-            <Button onClick={handleOpen} sx={{ my: 1, color: 'white', display: 'block' }}>
-                Register
-            </Button>
-            <Dialog open={params.has('register') && props.enabled} onClose={handleClose}>
+            {props.mode === 'md' ? (
+                <Button
+                    onClick={handleOpen}
+                    sx={{
+                        my: 1,
+                        color: 'white',
+                        display: {
+                            md: props.mode === 'md' ? 'block' : 'none',
+                            xs: 'none',
+                        },
+                    }}
+                >
+                    Register
+                </Button>
+            ) : (
+                <MenuItem onClick={props.onClick} component={NavLink} to={'?register'}>
+                    <Typography textAlign='center' color='white'>
+                        Register
+                    </Typography>
+                </MenuItem>
+            )}
+            <Dialog open={params.has('register')} onClose={handleClose}>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <DialogTitle>
                         {' '}

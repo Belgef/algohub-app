@@ -1,8 +1,5 @@
-import 'highlight.js/styles/vs.css';
-
 import { Container, Grid, Typography } from '@mui/material';
-import hljs from 'highlight.js';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useGetProblemByIdQuery } from '../../api/slices/problemApi';
@@ -21,8 +18,6 @@ const ProblemSolvePage = () => {
     const [addSolve] = useAddSolveMutation();
     const [results, setResults] = useState<string[]>();
 
-    useEffect(() => hljs.highlightAll());
-
     return (
         <>
             <Grid container sx={{ width: '100%' }} alignItems={'stretch'}>
@@ -36,7 +31,7 @@ const ProblemSolvePage = () => {
                     />
                 </Grid>
                 <Grid item sm={12} md={4} lg={4}>
-                    <Container sx={{ mt: '1em' }}>
+                    <Container sx={{ mt: '2em' }}>
                         <Typography variant='h5' component={'div'}>
                             {problem?.problemName}
                         </Typography>

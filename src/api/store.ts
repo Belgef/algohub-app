@@ -1,5 +1,15 @@
 import { Action, ThunkAction, configureStore } from '@reduxjs/toolkit';
+import {
+    IAuthTokens,
+    TokenRefreshRequest,
+    applyAuthTokenInterceptor,
+    clearAuthTokens,
+    getAccessToken,
+} from 'axios-jwt';
 
+import { UserClient } from './api';
+import { API_BASE_URL, axiosInstance } from './clients';
+import appSlice from './slices/appSlice';
 import commentApi from './slices/commentApi';
 import lessonApi from './slices/lessonApi';
 import problemApi from './slices/problemApi';
@@ -15,6 +25,7 @@ export const store = configureStore({
         [commentApi.reducerPath]: commentApi.reducer,
         [solveApi.reducerPath]: solveApi.reducer,
         [tagApi.reducerPath]: tagApi.reducer,
+        appSlice: appSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware()
@@ -25,6 +36,24 @@ export const store = configureStore({
             .concat(solveApi.middleware)
             .concat(tagApi.middleware),
 });
+
+const requestRefresh: TokenRefreshRequest = async (refreshToken: string): Promise<IAuthTokens | string> => {
+    const response = await new UserClient(API_BASE_URL)
+        .refreshToken({ oldJwtToken: getAccessToken() ?? '', refreshToken })
+        .catch(async () => {
+            localStorage.removeItem('auth-tokens-development');
+            return Promise.reject()
+        });
+
+    store.dispatch(userApi.util.invalidateTags(['User']));
+
+    return {
+        accessToken: response.token,
+        refreshToken: response.refreshToken,
+    };
+};
+
+applyAuthTokenInterceptor(axiosInstance, { requestRefresh });
 
 export type AppDispatch = typeof store.dispatch;
 export type RootState = ReturnType<typeof store.getState>;

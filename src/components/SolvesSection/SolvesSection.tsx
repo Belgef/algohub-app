@@ -70,7 +70,7 @@ const SolvesSection = (props: SolvesSectionProps) => {
                         }
                     })
                     .map((solve) => (
-                        <Solve solve={solve} />
+                        <Solve key={solve.solveId} solve={solve} />
                     ))}
             </CommentElement.Group>
         </Stack>

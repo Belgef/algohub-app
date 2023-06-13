@@ -1,7 +1,9 @@
+import InfoIcon from '@mui/icons-material/Info';
 import { Box, Card, CardContent, Container, Paper, Stack, Typography } from '@mui/material';
 import React, { useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 
+import { useAppSelector } from '../../api/hooks';
 import { useGetDeletedLessonsQuery, useGetLessonsQuery } from '../../api/slices/lessonApi';
 import { useGetDeletedProblemsQuery, useGetProblemsQuery } from '../../api/slices/problemApi';
 import ProblemLessonCard from '../../components/ProblemLessonCard/ProblemLessonCard';
@@ -10,6 +12,7 @@ import useAuthorization from '../../hooks/useAuthorization';
 
 const HomePage = () => {
     const user = useAuthorization();
+    const theme = useAppSelector((state) => state.appSlice.theme);
 
     const { data: problems } = useGetProblemsQuery();
     const { data: lessons } = useGetLessonsQuery();
@@ -52,53 +55,92 @@ const HomePage = () => {
     }, [problems, lessons, user, deletedLessons, deletedProblems]);
 
     return (
-        <Container maxWidth='lg'>
-            <Box
-                sx={{
-                    height: 300,
-                    backgroundColor: 'primary.dark',
-                    my: '2em',
-                    px: '2em',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1em',
-                }}
-                component={Paper}
-                elevation={3}
+        <>
+            <Container
+                maxWidth={false}
+                sx={{ backgroundImage: 'url(hero.jpg)', backgroundBlendMode: 'multiply', backgroundSize: 'cover', mb: '2em', backgroundColor: '#00000060' }}
             >
-                <Typography variant='h1' color={'Background'} fontWeight={700} display={'inline'}>
-                    ALGOHUB
-                </Typography>
-                <Typography variant='h4' color={'Background'} display={'inline'}>
-                    open community algorithm solving platform
-                </Typography>
-            </Box>
-
-            <Stack spacing={3}>
-                {titles.map((t, j) => (
-                    <Card key={t}>
-                        <CardContent sx={{ backgroundColor: 'primary.dark', color: 'Background' }}>
-                            {links[j] ? (
-                                <Typography variant='h5' component={NavLink} to={links[j]!} sx={{ color: 'white' }}>
-                                    {t}
-                                </Typography>
-                            ) : (
-                                <Typography variant='h5' sx={{ color: 'white' }}>
-                                    {t}
-                                </Typography>
-                            )}
-                        </CardContent>
-                        <CardContent>
-                            <Stack spacing={1} direction={'row'} sx={{ overflowX: 'auto', py: '1px' }}>
-                                {sets[j]?.map((p, i) => (
-                                    <ProblemLessonCard element={p} key={i} />
-                                ))}
-                            </Stack>
-                        </CardContent>
-                    </Card>
-                ))}
-            </Stack>
-        </Container>
+                <Container maxWidth='lg'>
+                    <Box
+                        sx={{
+                            height: 400,
+                            background: 'none',
+                            px: '2em',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '1em',
+                        }}
+                        component={Paper}
+                    >
+                        <img src='logo192.png' alt='logo' />
+                        <Typography variant='h1' color={'white'} fontWeight={700} display={'inline'}>
+                            ALGOHUB
+                        </Typography>
+                        <Typography variant='h4' color={'white'} display={'inline'}>
+                            open community algorithm solving platform
+                        </Typography>
+                    </Box>
+                </Container>
+            </Container>
+            <Container maxWidth={false} sx={{ mb: '2em' }}>
+                <Container maxWidth='lg'>
+                    <Box
+                        sx={{
+                            height: 200,
+                            px: '4em',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '3em',
+                        }}
+                        component={Paper}
+                        elevation={8}
+                    >
+                        <InfoIcon sx={{fontSize:60}} color='primary' />
+                        <Typography variant='h5' display={'inline'}>
+                        Competitive programming can help develop skills such as problem-solving, critical thinking, and efficient coding. These can be valuable in a variety of careers such as software development, data science, and research.
+                        </Typography>
+                    </Box>
+                </Container>
+            </Container>
+            <Container maxWidth='lg'>
+                <Stack spacing={3}>
+                    {titles.map((t, j) => (
+                        <Card key={t} elevation={6}>
+                            <CardContent
+                                sx={{
+                                    backgroundColor: theme === 'dark' ? 'grey.900' : 'primary.main',
+                                }}
+                            >
+                                {links[j] ? (
+                                    <Typography variant='h5' component={NavLink} to={links[j]!} sx={{ color: 'white' }}>
+                                        {t}
+                                    </Typography>
+                                ) : (
+                                    <Typography variant='h5' sx={{ color: 'white' }}>
+                                        {t}
+                                    </Typography>
+                                )}
+                            </CardContent>
+                            <CardContent>
+                                {sets[j]?.length > 0 ? (
+                                    <Stack
+                                        spacing={3}
+                                        direction={'row'}
+                                        sx={{ overflowX: 'auto', overflowY: 'visible', py: '1px', pb: 1 }}
+                                    >
+                                        {sets[j]?.map((p, i) => (
+                                            <ProblemLessonCard element={p} key={i} />
+                                        ))}
+                                    </Stack>
+                                ) : (
+                                    <Typography textAlign='center'>Nothing to show</Typography>
+                                )}
+                            </CardContent>
+                        </Card>
+                    ))}
+                </Stack>
+            </Container>
+        </>
     );
 };
 

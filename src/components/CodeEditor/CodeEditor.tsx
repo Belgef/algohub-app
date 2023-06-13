@@ -7,12 +7,15 @@ import 'ace-builds/src-noconflict/mode-csharp';
 import 'ace-builds/src-noconflict/mode-c_cpp';
 import 'ace-builds/src-noconflict/mode-python';
 import 'ace-builds/src-noconflict/theme-dawn';
+import 'ace-builds/src-noconflict/theme-idle_fingers';
 import 'ace-builds/src-noconflict/ext-language_tools';
 
 import { Button, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { useCallback, useState } from 'react';
 import AceEditor from 'react-ace';
 import { useSearchParams } from 'react-router-dom';
+
+import { useAppSelector } from '../../api/hooks';
 
 type CodeEditorProps = {
     default: string;
@@ -42,11 +45,13 @@ const CodeEditor = (props: CodeEditorProps) => {
         },
         [lang, params, setParams]
     );
+    const theme = useAppSelector((store) => store.appSlice.theme);
+
     return (
         <div style={{ position: 'relative', padding: '1em', height: '100%' }}>
             <AceEditor
                 mode={lang === 'cpp' ? 'c_cpp' : lang ?? 'python'}
-                theme='dawn'
+                theme={theme === 'dark' ? 'idle_fingers' : 'dawn'}
                 onChange={(c) => onChange(c, lang ?? 'python')}
                 name='ace'
                 editorProps={{ $blockScrolling: true }}

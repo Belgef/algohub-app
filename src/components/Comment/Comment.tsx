@@ -6,6 +6,7 @@ import { Button, Comment as CommentElement, Form } from 'semantic-ui-react';
 
 import { CommentViewModel } from '../../api/api';
 import { STORAGE_BASE_URL } from '../../api/constants';
+import { useAppSelector } from '../../api/hooks';
 import useAuthorization from '../../hooks/useAuthorization';
 
 type CommentsProps = {
@@ -17,6 +18,8 @@ const Comment = (props: CommentsProps) => {
     const user = useAuthorization();
     const [reply, setReply] = useState(false);
     const { control, handleSubmit, reset } = useForm<{ reply: string }>({ defaultValues: { reply: '' } });
+    const theme = useAppSelector((state) => state.appSlice.theme);
+
     return (
         <CommentElement>
             <CommentElement.Avatar
@@ -29,16 +32,21 @@ const Comment = (props: CommentsProps) => {
                 className='roundedIcon'
             />
             <CommentElement.Content>
-                <CommentElement.Author as='a'>
+                <CommentElement.Author as='a' className={theme === 'dark' ? 'white-text' : 'black-text'}>
                     {props.comment?.author?.fullName ?? '@' + props.comment?.author?.userName ?? 'deleted'}
                 </CommentElement.Author>
-                <CommentElement.Metadata>
+                <CommentElement.Metadata className={theme === 'dark' ? 'white-text' : 'black-text'}>
                     <div>{moment.utc(props.comment?.createDate).local().calendar().toLocaleString()}</div>
                 </CommentElement.Metadata>
-                <CommentElement.Text className='prelined'>{props.comment?.content}</CommentElement.Text>
+                <CommentElement.Text className={'prelined ' + (theme === 'dark' ? 'white-text' : 'black-text')}>
+                    {props.comment?.content}
+                </CommentElement.Text>
                 {user && (
                     <CommentElement.Actions>
-                        <CommentElement.Action onClick={() => setReply(!reply)}>
+                        <CommentElement.Action
+                            onClick={() => setReply(!reply)}
+                            className={theme === 'dark' ? 'white-text' : 'black-text'}
+                        >
                             {reply ? 'Cancel reply' : 'Reply'}
                         </CommentElement.Action>
                     </CommentElement.Actions>

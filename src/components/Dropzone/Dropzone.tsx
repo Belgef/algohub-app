@@ -1,24 +1,9 @@
+import CloseIcon from '@mui/icons-material/Close';
 import { IconButton } from '@mui/material';
 import React, { useMemo, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import CloseIcon from '@mui/icons-material/Close';
 
-const baseStyle = {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'row' as const,
-    alignItems: 'center',
-    padding: '16.5px 14px',
-    borderWidth: 1,
-    borderRadius: 4,
-    borderColor: 'rgba(0, 0, 0, 0.2)',
-    borderStyle: 'solid',
-    outline: 'none',
-    transition: 'border .24s ease-in-out',
-    marginTop: 8,
-    marginBottom: 4,
-    color: 'rgba(0, 0, 0, 0.6)',
-};
+import { useAppSelector } from '../../api/hooks';
 
 const focusedStyle = {
     borderColor: '#2196f3',
@@ -70,9 +55,23 @@ const StyledDropzone = (props: DropzoneProps) => {
         onDropRejected: () => setLastResult('rejected'), //, 'Image rejected']),
     });
 
+    const theme = useAppSelector((state) => state.appSlice.theme);
+
     const style = useMemo(
         () => ({
-            ...baseStyle,
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'row' as const,
+            alignItems: 'center',
+            padding: '16.5px 14px',
+            borderWidth: 1,
+            borderRadius: 4,
+            borderColor: theme === 'dark' ? '#ffffff40' : '#00000040',
+            borderStyle: 'solid ',
+            outline: 'none',
+            marginTop: 8,
+            marginBottom: 4,
+            color: theme==='dark' ? 'rgba(255, 255, 255, 0.6)': 'rgba(0, 0, 0, 0.6)',
             ...(isFocused ? focusedStyle : {}),
             ...(isDragAccept || imageUrl ? acceptStyle : {}),
             ...((!isDragAccept && lastResult === 'rejected') || isDragReject || props.error ? rejectStyle : {}),
@@ -84,7 +83,7 @@ const StyledDropzone = (props: DropzoneProps) => {
             transition: 'all 0.5s ease-in-out',
             boxSizing: 'border-box' as const,
         }),
-        [isFocused, isDragAccept, isDragReject, props.error, lastResult, imageUrl, props.fullHeight]
+        [isFocused, isDragAccept, isDragReject, props.error, lastResult, imageUrl, props.fullHeight, theme]
     );
 
     return (

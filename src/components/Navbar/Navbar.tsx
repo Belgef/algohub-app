@@ -10,13 +10,20 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
 import { NavLink } from 'react-router-dom';
+import { DarkModeSwitch } from 'react-toggle-dark-mode';
 
+import { useAppDispatch, useAppSelector } from '../../api/hooks';
+import { setTheme } from '../../api/slices/appSlice';
 import AuthComponent from '../AuthComponent/AuthComponent';
+import LoginDialog from '../LoginDialog/LoginDialog';
+import RegisterDialog from '../RegisterDialog/RegisterDialog';
 
 const pages = ['Problems', 'Lessons'];
 
 const Navbar = () => {
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
+    const dispatch = useAppDispatch();
+    const theme = useAppSelector((state) => state.appSlice.theme);
 
     const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElNav(event.currentTarget);
@@ -47,7 +54,6 @@ const Navbar = () => {
                     >
                         ALGOHUB
                     </Typography>
-
                     <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
                         <IconButton
                             size='large'
@@ -78,12 +84,14 @@ const Navbar = () => {
                             }}
                         >
                             {pages.map((page) => (
-                                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                                    <Typography textAlign='center' component={NavLink} to={page}>
+                                <MenuItem key={page} onClick={handleCloseNavMenu} component={NavLink} to={page}>
+                                    <Typography textAlign='center' color='white'>
                                         {page}
                                     </Typography>
                                 </MenuItem>
                             ))}
+                            <LoginDialog mode='xs' onClick={handleCloseNavMenu} />
+                            <RegisterDialog mode='xs' onClick={handleCloseNavMenu} />
                         </Menu>
                     </Box>
                     <Typography
@@ -110,12 +118,19 @@ const Navbar = () => {
                                 onClick={handleCloseNavMenu}
                                 sx={{ my: 1, color: 'white', display: 'block' }}
                                 component={NavLink}
-                                to={'/'+page}
+                                to={'/' + page}
                             >
                                 {page}
                             </Button>
                         ))}
                     </Box>
+                    <DarkModeSwitch
+                        style={{ marginRight: 8 }}
+                        checked={theme === 'dark'}
+                        onChange={() => dispatch(setTheme(theme === 'dark' ? 'light' : 'dark'))}
+                        moonColor='white'
+                        sunColor='white'
+                    />
                     <AuthComponent />
                 </Toolbar>
             </Container>

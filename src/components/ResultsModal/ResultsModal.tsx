@@ -1,5 +1,3 @@
-import 'highlight.js/styles/vs.css';
-
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import {

@@ -1,19 +1,31 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    MenuItem,
+    TextField,
+    Typography,
+} from '@mui/material';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { NavLink, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { UserLoginViewModel } from '../../api/api';
+import { userClient } from '../../api/clients';
+import { useGetUserQuery, useLoginMutation } from '../../api/slices/userApi';
 
 export type LoginDialogProps = {
-    enabled: boolean;
-    onSubmit: (user: UserLoginViewModel) => boolean | Promise<boolean>;
-    onClose?: () => void;
+    mode: 'md' | 'xs';
+    onClick?: () => void;
 };
 
 const LoginDialog = (props: LoginDialogProps) => {
     const [params, setParams] = useSearchParams();
     const navigate = useNavigate();
+    const [login] = useLoginMutation();
+    const { data: user } = useGetUserQuery();
 
     const { handleSubmit, control } = useForm<UserLoginViewModel>({
         defaultValues: { userName: '', password: '' },
@@ -27,11 +39,10 @@ const LoginDialog = (props: LoginDialogProps) => {
     const handleClose = () => {
         params.delete('login');
         setParams(params);
-        props.onClose?.();
     };
 
     const onSubmit = async (user: UserLoginViewModel) => {
-        if (await props.onSubmit(user)) {
+        if (await login(user)) {
             if (params.has('return')) {
                 navigate(params.get('return')!);
             } else {
@@ -39,13 +50,31 @@ const LoginDialog = (props: LoginDialogProps) => {
             }
         }
     };
-
-    return (
+    
+    return user ? null : (
         <>
-            <Button onClick={handleOpen} sx={{ my: 1, color: 'white', display: 'block' }}>
-                Login
-            </Button>
-            <Dialog open={params.has('login') && props.enabled} onClose={handleClose}>
+            {props.mode === 'md' ? (
+                <Button
+                    onClick={handleOpen}
+                    sx={{
+                        my: 1,
+                        color: 'white',
+                        display: {
+                            md: props.mode === 'md' ? 'block' : 'none',
+                            xs: 'none',
+                        },
+                    }}
+                >
+                    Login
+                </Button>
+            ) : (
+                <MenuItem onClick={props.onClick} component={NavLink} to='?login'>
+                    <Typography textAlign='center' color='white'>
+                        Login
+                    </Typography>
+                </MenuItem>
+            )}
+            <Dialog open={params.has('login')} onClose={handleClose}>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <DialogTitle>Login</DialogTitle>
                     <DialogContent>
@@ -83,6 +112,14 @@ const LoginDialog = (props: LoginDialogProps) => {
                                     helperText={fieldState.error?.message}
                                 />
                             )}
+                            rules={{
+                                validate: {
+                                    valid: async (_, formValues) => {
+                                        const res = await userClient.login(formValues).catch((_) => null);
+                                        return res ? true : 'Password is invalid';
+                                    },
+                                },
+                            }}
                         />
                     </DialogContent>
                     <DialogActions>

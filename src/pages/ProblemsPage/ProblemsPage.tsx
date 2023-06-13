@@ -1,30 +1,27 @@
 import AddIcon from '@mui/icons-material/AddCircle';
-import SearchIcon from '@mui/icons-material/Search';
 import {
     Container,
     FormControl,
     IconButton,
-    InputBase,
     InputLabel,
     MenuItem,
-    Paper,
     Select,
     Stack,
     Toolbar,
     Typography,
 } from '@mui/material';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { NavLink, useSearchParams } from 'react-router-dom';
 
 import { useGetProblemsQuery } from '../../api/slices/problemApi';
 import ProblemLessonCard from '../../components/ProblemLessonCard/ProblemLessonCard';
+import SearchBar from '../../components/SearchBar/SearchBar';
 
 type Sort = 'popularity' | 'newest' | 'oldest' | 'rating';
 
 const ProblemsPage = () => {
     const { data: problems } = useGetProblemsQuery();
     const [params, setParams] = useSearchParams();
-    const [searchText, setSearchTest] = useState(params.get('search') ?? '');
 
     const set = useMemo(() => {
         const search = params.get('search')?.toLowerCase();
@@ -56,8 +53,6 @@ const ProblemsPage = () => {
             });
     }, [params, problems]);
 
-    useEffect(() => setSearchTest(params.get('search') ?? ''), [params]);
-
     return (
         <Container maxWidth='lg'>
             <Toolbar
@@ -74,34 +69,7 @@ const ProblemsPage = () => {
                         <AddIcon sx={{ fontSize: 24 }} />
                     </IconButton>
                 </Typography>
-                <Paper
-                    component='form'
-                    sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 400 }}
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        setSearchTest(searchText.trim());
-                        if (searchText.trim() === params.get('search')) {
-                            return;
-                        }
-                        if (searchText.trim() !== '') {
-                            params.set('search', searchText.trim());
-                        } else {
-                            params.delete('search');
-                        }
-                        setParams(params);
-                    }}
-                >
-                    <InputBase
-                        sx={{ ml: 1, flex: 1 }}
-                        placeholder='Search problems'
-                        inputProps={{ 'aria-label': 'search google maps' }}
-                        value={searchText}
-                        onChange={(e) => setSearchTest(e.target.value)}
-                    />
-                    <IconButton sx={{ p: '10px' }} aria-label='search' type='submit'>
-                        <SearchIcon />
-                    </IconButton>
-                </Paper>
+                <SearchBar />
                 <FormControl sx={{ m: 1, minWidth: 120 }}>
                     <InputLabel>Sort by</InputLabel>
                     <Select

@@ -10,6 +10,7 @@ import 'ace-builds/src-noconflict/mode-sql';
 import 'ace-builds/src-noconflict/mode-python';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/theme-dawn';
+import 'ace-builds/src-noconflict/theme-idle_fingers';
 import 'ace-builds/src-noconflict/ext-language_tools';
 
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
@@ -17,6 +18,7 @@ import React from 'react';
 import AceEditor from 'react-ace';
 
 import { ContentCreateElement, ContentType } from '../../api/api';
+import { useAppSelector } from '../../api/hooks';
 
 type ContentCodeEditorProps = {
     value?: ContentCreateElement;
@@ -36,11 +38,13 @@ const languages = {
 };
 
 const ContentCodeEditor = (props: ContentCodeEditorProps) => {
+    const theme = useAppSelector((state) => state.appSlice.theme);
+
     return (
         <div style={{ position: 'relative', padding: '1em', height: '100%' }}>
             <AceEditor
                 mode={props.value?.value === 'cpp' ? 'c_cpp' : props.value?.value}
-                theme='dawn'
+                theme={theme === 'dark' ? 'idle_fingers' : 'dawn'}
                 onChange={(c) =>
                     props.onChange?.({ code: c, value: props.value?.value, contentType: ContentType.Code })
                 }
@@ -54,7 +58,7 @@ const ContentCodeEditor = (props: ContentCodeEditorProps) => {
                 value={props.value?.code}
                 fontSize='1.2rem'
                 width='100%'
-                style={{ maxHeight: '30vh' }}
+                style={{ maxHeight: '30vh', background: 'none' }}
                 setOptions={{ minLines: 49, newLineMode: true }}
             />
             <FormControl sx={{ position: 'absolute', right: 24, top: 24 }}>
