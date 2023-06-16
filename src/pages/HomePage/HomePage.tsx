@@ -6,7 +6,9 @@ import { NavLink } from 'react-router-dom';
 import { useAppSelector } from '../../api/hooks';
 import { useGetDeletedLessonsQuery, useGetLessonsQuery } from '../../api/slices/lessonApi';
 import { useGetDeletedProblemsQuery, useGetProblemsQuery } from '../../api/slices/problemApi';
+import { useGetUsersQuery } from '../../api/slices/userApi';
 import ProblemLessonCard from '../../components/ProblemLessonCard/ProblemLessonCard';
+import UserCard from '../../components/UserCard/UserCard';
 import { isAdmin } from '../../helpers/userHelpers';
 import useAuthorization from '../../hooks/useAuthorization';
 
@@ -26,6 +28,7 @@ const HomePage = () => {
         '/Lessons?sort=newest',
     ];
     let titles = ['Trending problems', 'Trending lessons', 'New problems', 'New lessons'];
+    const userTitles = ['Best Solvers', 'Best Problem Creators', 'Best Lesson Creators'];
 
     if (user?.role === 'Administrator') {
         links.push(undefined, undefined, undefined, undefined);
@@ -54,11 +57,30 @@ const HomePage = () => {
         return res;
     }, [problems, lessons, user, deletedLessons, deletedProblems]);
 
+    const { data: users } = useGetUsersQuery();
+    const userSets = [
+        [...(users ?? [])]
+            .sort((a, b) => (b.userStats?.solvedProblems ?? 0) - (a.userStats?.solvedProblems ?? 0))
+            .slice(0, 10),
+        [...(users ?? [])]
+            .sort((a, b) => (b.userStats?.createdProblems ?? 0) - (a.userStats?.createdProblems ?? 0))
+            .slice(0, 10),
+        [...(users ?? [])]
+            .sort((a, b) => (b.userStats?.createdLessons ?? 0) - (a.userStats?.createdLessons ?? 0))
+            .slice(0, 10),
+    ];
+
     return (
         <>
             <Container
                 maxWidth={false}
-                sx={{ backgroundImage: 'url(hero.jpg)', backgroundBlendMode: 'multiply', backgroundSize: 'cover', mb: '2em', backgroundColor: '#00000060' }}
+                sx={{
+                    backgroundImage: 'url(hero.jpg)',
+                    backgroundBlendMode: 'multiply',
+                    backgroundSize: 'cover',
+                    mb: '2em',
+                    backgroundColor: '#00000060',
+                }}
             >
                 <Container maxWidth='lg'>
                     <Box
@@ -95,9 +117,11 @@ const HomePage = () => {
                         component={Paper}
                         elevation={8}
                     >
-                        <InfoIcon sx={{fontSize:60}} color='primary' />
+                        <InfoIcon sx={{ fontSize: 60 }} color='primary' />
                         <Typography variant='h5' display={'inline'}>
-                        Competitive programming can help develop skills such as problem-solving, critical thinking, and efficient coding. These can be valuable in a variety of careers such as software development, data science, and research.
+                            Competitive programming can help develop skills such as problem-solving, critical thinking,
+                            and efficient coding. These can be valuable in a variety of careers such as software
+                            development, data science, and research.
                         </Typography>
                     </Box>
                 </Container>
@@ -130,6 +154,34 @@ const HomePage = () => {
                                     >
                                         {sets[j]?.map((p, i) => (
                                             <ProblemLessonCard element={p} key={i} />
+                                        ))}
+                                    </Stack>
+                                ) : (
+                                    <Typography textAlign='center'>Nothing to show</Typography>
+                                )}
+                            </CardContent>
+                        </Card>
+                    ))}
+                    {userTitles.map((t, j) => (
+                        <Card key={t} elevation={6}>
+                            <CardContent
+                                sx={{
+                                    backgroundColor: theme === 'dark' ? 'grey.900' : 'primary.main',
+                                }}
+                            >
+                                    <Typography variant='h5' sx={{ color: 'white' }}>
+                                        {t}
+                                    </Typography>
+                            </CardContent>
+                            <CardContent>
+                                {userSets[j]?.length > 0 ? (
+                                    <Stack
+                                        spacing={3}
+                                        direction={'row'}
+                                        sx={{ overflowX: 'auto', overflowY: 'visible', py: '1px', pb: 1 }}
+                                    >
+                                        {userSets[j]?.map((u, i) => (
+                                            <UserCard element={u} key={i} />
                                         ))}
                                     </Stack>
                                 ) : (

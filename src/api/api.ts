@@ -1542,6 +1542,54 @@ export class UserClient {
         return Promise.resolve<UserViewModel>(null as any);
     }
 
+    
+
+    getAll(  cancelToken?: CancelToken | undefined): Promise<UserViewModel[]> {
+        let url_ = this.baseUrl + "/User/GetAll";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processGetAll(_response);
+        });
+    }
+
+    protected processGetAll(response: AxiosResponse): Promise<UserViewModel[]> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (let k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = _responseText;
+            return Promise.resolve<UserViewModel[]>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<UserViewModel[]>(null as any);
+    }
+
     checkUserName(userName: string | null | undefined , cancelToken?: CancelToken | undefined): Promise<boolean> {
         let url_ = this.baseUrl + "/checkUserName?";
         if (userName !== undefined && userName !== null)
@@ -2060,6 +2108,13 @@ export interface UserViewModel {
     email: string;
     role?: string | undefined;
     iconName?: string | undefined;
+    userStats?: UserStats;
+}
+
+export interface UserStats {
+    solvedProblems: number;
+    createdProblems: number;
+    createdLessons: number;
 }
 
 export interface ContentCreateElement {

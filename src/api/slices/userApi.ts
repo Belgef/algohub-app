@@ -56,6 +56,14 @@ export const userApi = createApi({
             },
             providesTags: ['User'],
         }),
+        getUsers: builder.query<UserViewModel[], void>({
+            queryFn: async () => {
+                const users = await userClient.getAll();
+
+                return { data: users };
+            },
+            providesTags: ['User'],
+        }),
         logout: builder.mutation<null, null>({
             queryFn: () => {
                 clearAuthTokens();
@@ -67,6 +75,6 @@ export const userApi = createApi({
     }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useGetUserQuery, useLogoutMutation } = userApi;
+export const { useLoginMutation, useRegisterMutation, useGetUserQuery, useLogoutMutation, useGetUsersQuery } = userApi;
 
 export default userApi;
