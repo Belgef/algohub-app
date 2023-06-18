@@ -11,14 +11,13 @@ import 'ace-builds/src-noconflict/theme-idle_fingers';
 import 'ace-builds/src-noconflict/ext-language_tools';
 
 import { Button, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import AceEditor from 'react-ace';
 import { useSearchParams } from 'react-router-dom';
 
 import { useAppSelector } from '../../api/hooks';
 
 type CodeEditorProps = {
-    default: string;
     onSubmit: (code: string, language: string) => void;
 };
 
@@ -31,10 +30,30 @@ const languages = {
     python: 'Python',
 };
 
+const templates = {
+    cpp: "#include <iostream>\n\nint main()\n{\n    // start typing here\n}\n",
+    csharp: "using System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text.RegularExpressions;\n\nnamespace AlgoHub\n{\n    public class Program\n    {\n        public static void Main(string[] args)\n        {\n            // start typing here\n        }\n    }\n}\n",
+    java: "import java.util.*;\nimport java.lang.*;\n\nclass Rextester\n{\n    public static void main(String args[])\n    {\n        // start typing here\n    }\n}\n",
+    javascript: "// Rhino 1.7.7.1\n// To get an input, use string \"$input\" instead\n\n// start typing here\n",
+    php: "<?php //php 7.2.24\n\n    // start typing here\n    \n?>\n",
+    python: "// start typing here\n",
+};
+
 const CodeEditor = (props: CodeEditorProps) => {
-    const [code, setCode] = useState(props.default);
+    const [code, setCode] = useState("");
     const [params, setParams] = useSearchParams();
-    const lang = params.get('language');
+    const lang = (params.get('language') ?? 'python') as keyof typeof languages
+    useEffect(()=>{
+        if(params.has('language') && params.get("language")!=="" && !Object.keys(languages).includes(params.get('language')!)){
+            params.delete('language');
+            setParams(params)
+        }
+    },[params, setParams])
+
+    useEffect(()=>{
+        setCode(templates[lang])
+    },[lang])
+
     const onChange = useCallback(
         (code: string, language: string) => {
             setCode(code);

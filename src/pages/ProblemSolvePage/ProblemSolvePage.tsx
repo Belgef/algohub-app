@@ -23,7 +23,6 @@ const ProblemSolvePage = () => {
             <Grid container sx={{ width: '100%' }} alignItems={'stretch'}>
                 <Grid item sm={12} md={8} lg={8}>
                     <CodeEditor
-                        default=''
                         onSubmit={async (code, lang) => {
                             const res = await addSolve({ code: code, languageName: lang, problemId: id });
                             setResults('data' in res ? res.data ?? undefined : []);
