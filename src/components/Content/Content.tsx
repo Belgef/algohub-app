@@ -43,7 +43,7 @@ const Content = (props: ContentProps) => {
                         </Typography>
                     )}
                     {content.contentType === ContentType.Image && (
-                        <Card key={i} sx={{ alignSelf: 'center', minWidth: '60%' }}>
+                        <Card key={i} sx={{ alignSelf: 'center' }}>
                             <img src={STORAGE_BASE_URL + content.imageName} style={{maxWidth:'100%', maxHeight:'50vh'}} alt='contentImage' />
                             <CardContent className='prelined'>{content.value}</CardContent>
                         </Card>
